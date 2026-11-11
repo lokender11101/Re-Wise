@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { RefineRequestSchema } from '@/lib/schemas';
 import { buildRefinementPrompt } from '@/lib/prompts';
-import { callGeminiStructured, GeminiServiceError } from '@/lib/gemini';
+import { callDeepSeekStructured, DeepSeekServiceError } from '@/lib/deepseek';
 import { extractAndParseJSON, validateGenerationResponse } from '@/lib/validation';
 import type { StudyBlock } from '@/types/study';
 
@@ -49,8 +49,8 @@ export async function POST(request: NextRequest) {
       instruction
     );
 
-    // 3. Call Gemini
-    const { rawText } = await callGeminiStructured({
+    // 3. Call DeepSeek
+    const { rawText } = await callDeepSeekStructured({
       systemInstruction,
       userPrompt,
       timeoutMs: 35000,
@@ -63,12 +63,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: validatedData,
-      source: 'gemini-refinement',
+      source: 'deepseek-refinement',
     });
   } catch (error: unknown) {
     console.error('Error in /api/refine:', error);
 
-    if (error instanceof GeminiServiceError) {
+    if (error instanceof DeepSeekServiceError) {
       return NextResponse.json(
         {
           error: {

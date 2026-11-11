@@ -149,7 +149,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <Cpu className="w-4 h-4 text-cyan-400 shrink-0" />
             <div className="min-w-0 flex-1">
               <span className="font-semibold text-slate-200 block text-[11px]">
-                Gemini 2.5 Flash
+                DeepSeek Flash
               </span>
               <span className="text-[10px] text-emerald-400 flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />

@@ -5,16 +5,18 @@
 
 ReWise transforms unstructured lecture notes, educational articles, and textbook excerpts into structured, highly interactive active-learning blocks: **Conceptual Summaries**, **3D Flip Flashcards**, **Multiple-Choice Quizzes**, and **Revision Checklists** with dedicated **Wrong-Answer Retesting** and an **AI Refinement Loop**.
 
+Powered by **DeepSeek API** (`deepseek-flash`) using the official **OpenAI JavaScript SDK** with strict JSON Schema output mode.
+
 ---
 
 ## 🌟 Key Features
 
-- **Strict Structured AI Output (Not a Chatbot)**: Communicates with Google Gemini server-side via `@google/genai`, requesting structured JSON and enforcing strict Zod validation before rendering.
+- **Strict Structured AI Output (Not a Chatbot)**: Communicates with DeepSeek server-side via the official `openai` SDK (`baseURL: https://api.deepseek.com`), requesting `{ type: "json_object" }` structured output and enforcing strict Zod schema validation before rendering.
 - **Defensive Error & Bad AI Output Handling (20% weight)**:
   - Markdown code-fence stripper and robust outermost JSON extractor.
   - Zod discriminated union schema validation.
-  - Semantic range checks (e.g. ensuring `correctAnswerIndex` falls within options bounds).
-  - Entity ID stabilization (does not rely on LLM to generate stable React keys).
+  - Semantic range checks (e.g. ensuring `correctAnswerIndex` falls strictly within options bounds).
+  - Entity ID stabilization (never relies on the LLM to generate stable React keys).
   - Race condition prevention using monotonically increasing request IDs and `AbortController`.
   - Graceful fallback with user-friendly error banners and one-click retry.
 - **3D Flip Flashcards with Keyboard Navigation**:
@@ -27,7 +29,7 @@ ReWise transforms unstructured lecture notes, educational articles, and textbook
 - **Revision Checklists**:
   - Step-by-step revision milestones with real-time percentage progress.
 - **AI Content Refinement Loop**:
-  - Allows learners to refine and adapt active sessions (e.g., *"Make quiz questions harder"*, *"Add 4 more flashcards on edge cases"*, *"Simplify summary with analogies"*).
+  - Allows learners to refine and adapt active sessions using DeepSeek (e.g., *"Make quiz questions harder"*, *"Add 4 more flashcards on edge cases"*, *"Simplify summary with analogies"*).
 - **Corrupt-Proof Local Persistence**:
   - Automatically saves study sessions and learning progress to `localStorage`.
   - Validates stored data with Zod upon retrieval; gracefully sanitizes corrupted entries without crashing.
@@ -44,8 +46,8 @@ flowchart TD
     B --> C["Cancel In-Flight Request (AbortController)"]
     C --> D["Assign Monotonic Request ID"]
     D --> E["Next.js Route Handler (/api/generate or /api/refine)"]
-    E --> F["Google Gemini API (@google/genai)"]
-    F --> G["Raw String Output"]
+    E --> F["DeepSeek API (OpenAI SDK @ api.deepseek.com)"]
+    F --> G["Raw JSON String Output (response_format: json_object)"]
     G --> H["extractAndParseJSON (Strips codeblocks & repairs)"]
     H --> I["Zod Schema Validation (Discriminated Union)"]
     I --> J["stabilizeBlockIds (Guaranteed unique entity keys)"]
@@ -64,8 +66,8 @@ flowchart TD
 rewise/
 ├── app/
 │   ├── api/
-│   │   ├── generate/route.ts       # Secure Gemini structured generation endpoint
-│   │   └── refine/route.ts         # Targeted iterative refinement endpoint
+│   │   ├── generate/route.ts       # Secure DeepSeek structured generation endpoint
+│   │   └── refine/route.ts         # Targeted iterative DeepSeek refinement endpoint
 │   ├── layout.tsx                  # Root layout, dark mode, metadata
 │   ├── page.tsx                    # Main interactive study dashboard
 │   └── globals.css                 # Tailwind base styles and custom scrollbars
@@ -101,7 +103,7 @@ rewise/
 │   ├── useKeyboardNav.ts           # Accessible keyboard shortcuts for flashcards
 │   └── useStudySession.ts          # Central state owner for active session & scores
 ├── lib/
-│   ├── gemini.ts                   # Google Gen AI SDK client and error translation
+│   ├── deepseek.ts                 # DeepSeek API client via OpenAI SDK and error translation
 │   ├── mockData.ts                 # Offline / fallback mock dataset for demo/testing
 │   ├── prompts.ts                  # Structured system prompts and pedagogical rules
 │   ├── schemas.ts                  # Zod schemas for requests, responses, and storage
@@ -126,8 +128,8 @@ rewise/
 - **Framework**: Next.js 15 (App Router, Server Route Handlers)
 - **Language**: TypeScript (Strict mode, zero implicit `any`)
 - **Styling**: Tailwind CSS (Tailwind v3)
-- **AI SDK**: Official `@google/genai` (Google Gen AI JavaScript SDK)
-- **Model**: `gemini-2.5-flash` (Structured JSON output with low temperature)
+- **AI SDK**: Official `openai` JavaScript SDK connected to DeepSeek API
+- **Model**: `deepseek-flash` (`baseURL: https://api.deepseek.com`, `response_format: { type: "json_object" }`)
 - **Validation**: Zod (Discriminated unions, custom range refinements)
 - **Icons**: Lucide React
 - **Celebrations**: `canvas-confetti`
@@ -141,7 +143,7 @@ rewise/
 
 ```bash
 # Clone the repository
-git clone https://github.com/lokender11101/Re-Wise.git
+git clone https://github.com/lokenderrao/Re-Wise.git
 cd Re-Wise
 
 # Install dependencies
@@ -156,14 +158,14 @@ Create a `.env.local` file in the root directory:
 cp .env.example .env.local
 ```
 
-Add your Google Gemini API key (get a free key at [Google AI Studio](https://aistudio.google.com/)):
+Add your DeepSeek API key:
 
 ```env
-GEMINI_API_KEY=your_actual_gemini_api_key_here
-GEMINI_MODEL=gemini-2.5-flash
+DEEPSEEK_API_KEY=your_deepseek_api_key_here
+DEEPSEEK_MODEL=deepseek-flash
 ```
 
-> **Note on API Security:** The `GEMINI_API_KEY` is accessed **strictly server-side** in Next.js route handlers (`app/api/*`) and is never leaked to the client bundle. `.env.local` is ignored by `.gitignore`.
+> **Note on API Security:** The `DEEPSEEK_API_KEY` is accessed **strictly server-side** in Next.js route handlers (`app/api/*`) and is never leaked to the client bundle. `.env.local` is ignored by `.gitignore`.
 
 ### 3. Run the Application
 
@@ -215,7 +217,7 @@ All 21 unit tests verify:
 | **Invalid Schema / Missing Fields** | Zod schema validation checks types and array bounds. Emits readable diagnostic paths. |
 | **Out-of-Bounds Quiz Answer Index** | `.refine(q => q.correctAnswerIndex >= 0 && q.correctAnswerIndex < q.options.length)` ensures quiz questions never reference invalid options. |
 | **Race Conditions** | `useGeneration` tracks monotonic `latestRequestIdRef` and cancels prior in-flight calls via `AbortController`. If a slow older request finishes after a faster newer request, the older result is safely discarded. |
-| **Gemini Rate Limits (429) & Timeouts** | Server-side 30s timeout via `AbortController`. Errors are mapped to friendly HTTP status codes (`429`, `504`) with a one-click retry button. |
+| **DeepSeek Rate Limits (429) & Timeouts** | Server-side 35s timeout via `AbortController`. Errors are mapped to friendly HTTP status codes (`429`, `504`) with a one-click retry button. |
 | **Corrupted `localStorage`** | `getSavedSessions` validates each session individually with Zod. Corrupted records are quarantined without crashing the app. |
 | **Offline / Missing API Key** | App provides an **"Instant Demo"** button that pre-loads a full mock session for seamless evaluation without credentials. |
 
@@ -237,21 +239,13 @@ In compliance with the assignment instructions:
 
 - **Phase 1: Assignment Analysis & Architectural Blueprint** — 0.75h
 - **Phase 2: Data Contracts, Zod Schemas & Vitest Suite** — 1.0h
-- **Phase 3: Backend Routes & Server-Side Gemini SDK Integration** — 1.25h
+- **Phase 3: Backend Routes & Server-Side DeepSeek Integration** — 1.25h
 - **Phase 4: Interactive Learning Blocks (Flashcards, Quiz, Checklist)** — 1.75h
 - **Phase 5: Wrong-Answer Retest Engine & Study Progress Tracking** — 1.0h
 - **Phase 6: Session Persistence & Corrupted Storage Recovery** — 0.75h
 - **Phase 7: AI Refinement Loop & UI Polish** — 0.75h
 - **Phase 8: Build Verification, Responsive Testing & Documentation** — 0.75h
 - **Total Work Time**: **~8.0 hours**
-
----
-
-## 📌 Known Limitations & Future Improvements
-
-1. **Streaming Partial JSON**: The current release prioritizes data integrity and schema validation, buffering the complete model JSON before committing it to application state. Future versions could implement progressive JSON streaming using chunked parser libraries.
-2. **Audio Pronunciation**: Adding Web Speech API integration to pronounce flashcard terms for language learning.
-3. **Spaced Repetition (SM-2 Algorithm)**: Extending localStorage to schedule flashcard reviews at intervals (1 day, 3 days, 1 week) based on recall difficulty.
 
 ---
 

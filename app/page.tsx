@@ -133,7 +133,7 @@ export default function ReWiseDashboard() {
         {/* Error Alert with Retry button */}
         {error && (
           <ErrorAlert
-            title={error.code === 'API_KEY_MISSING' ? 'Gemini API Key Required' : 'Generation Failed'}
+            title={error.code === 'API_KEY_MISSING' ? 'DeepSeek API Key Required' : 'Generation Failed'}
             message={error.message}
             code={error.code}
             retryable={error.retryable}

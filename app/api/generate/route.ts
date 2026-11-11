@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GenerateRequestSchema } from '@/lib/schemas';
 import { buildGenerationPrompt } from '@/lib/prompts';
-import { callGeminiStructured, GeminiServiceError } from '@/lib/gemini';
+import { callDeepSeekStructured, DeepSeekServiceError } from '@/lib/deepseek';
 import { extractAndParseJSON, validateGenerationResponse } from '@/lib/validation';
 import { MOCK_GENERATION_RESPONSE } from '@/lib/mockData';
 
@@ -22,8 +22,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check for demo mode query param or header (explicitly requested by user for offline testing)
-    const isDemoMode = request.nextUrl.searchParams.get('demo') === 'true' || request.headers.get('x-demo-mode') === 'true';
+    // Check for demo mode query param or header (explicitly requested for offline/demo testing)
+    const isDemoMode =
+      request.nextUrl.searchParams.get('demo') === 'true' ||
+      request.headers.get('x-demo-mode') === 'true';
+
     if (isDemoMode) {
       return NextResponse.json({
         success: true,
@@ -54,14 +57,14 @@ export async function POST(request: NextRequest) {
     // 2. Build structured generation prompt
     const { systemInstruction, userPrompt } = buildGenerationPrompt(notes, difficulty, selectedTypes);
 
-    // 3. Call Google Gemini via server-side SDK
-    const { rawText } = await callGeminiStructured({
+    // 3. Call DeepSeek via official OpenAI SDK
+    const { rawText } = await callDeepSeekStructured({
       systemInstruction,
       userPrompt,
-      timeoutMs: 30000,
+      timeoutMs: 35000,
     });
 
-    // 4. Clean and parse raw output safely (strips markdown fences, parses JSON)
+    // 4. Clean and parse raw output safely (strips code fences, parses JSON)
     const parsedJSON = extractAndParseJSON(rawText);
 
     // 5. Strictly validate structured response against Zod contract
@@ -70,12 +73,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: validatedData,
-      source: 'gemini',
+      source: 'deepseek',
     });
   } catch (error: unknown) {
     console.error('Error in /api/generate:', error);
 
-    if (error instanceof GeminiServiceError) {
+    if (error instanceof DeepSeekServiceError) {
       return NextResponse.json(
         {
           error: {

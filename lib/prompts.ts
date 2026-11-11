@@ -1,7 +1,7 @@
 import type { DifficultyLevel, ContentBlockType, StudyBlock } from '@/types/study';
 
 /**
- * Builds the strict system prompt and user prompt for generating structured study materials.
+ * Builds the strict system prompt and user prompt for generating structured study materials via DeepSeek.
  */
 export function buildGenerationPrompt(
   notes: string,
@@ -23,29 +23,43 @@ export function buildGenerationPrompt(
   const systemInstruction = `You are ReWise, an elite AI Active Learning Architect and Cognitive Learning Specialist.
 Your mission is to transform unstructured lecture notes, articles, or topics into high-yield, structured active learning materials.
 
-CRITICAL INSTRUCTIONS:
-1. You MUST respond with STRICT VALID JSON ONLY. Do NOT wrap with markdown backticks (\`\`\`json). Do NOT include conversational greetings or preamble.
-2. The JSON root MUST be an object with two properties:
-   - "title": A clear, concise title for this study session.
-   - "blocks": An array containing the requested learning blocks.
-3. Supported block types to generate based on user request:
+CRITICAL INSTRUCTIONS FOR JSON OUTPUT:
+1. You MUST respond with a STRICT VALID JSON OBJECT ONLY.
+2. Do NOT wrap with markdown backticks (\`\`\`json). Do NOT output conversational text, greetings, or explanations outside the JSON object.
+3. The root JSON object MUST conform to this exact schema:
+{
+  "title": "Session Title Here",
+  "blocks": [
+    // Array of blocks conforming to requested block types
+  ]
+}
+
+Available block schemas:
+- Summary block:
+  { "type": "summary", "id": "summary-1", "title": "...", "content": "...", "keyPoints": ["..."] }
+- Flashcards block:
+  { "type": "flashcards", "id": "flashcards-1", "cards": [{ "id": "c-1", "question": "...", "answer": "...", "difficulty": "medium" }] }
+- Quiz block:
+  { "type": "quiz", "id": "quiz-1", "questions": [{ "id": "q-1", "question": "...", "options": ["Choice A", "Choice B", "Choice C", "Choice D"], "correctAnswerIndex": 0, "explanation": "..." }] }
+- Checklist block:
+  { "type": "checklist", "id": "checklist-1", "title": "Revision Checklist", "items": [{ "id": "item-1", "text": "..." }] }
+
+4. Requested block types for this generation:
 ${requestedBlocksDescription}
-4. STRICT QUIZ VALIDATION RULE:
-   - "correctAnswerIndex" MUST be an integer >= 0 and < options.length.
-   - Always ensure "options" has at least 4 realistic choices.
-   - Never provide a quiz question without an in-depth "explanation".
-5. DIFFICULTY ADAPTATION (${difficulty.toUpperCase()}):
+
+5. STRICT QUIZ VALIDATION RULE:
+   - "correctAnswerIndex" MUST be a valid 0-based integer strictly less than options.length (0, 1, 2, or 3).
+   - "options" MUST contain at least 4 distinct choices.
+   - Always include an in-depth "explanation" for each question.
+
+6. TARGET DIFFICULTY (${difficulty.toUpperCase()}):
    ${
      difficulty === 'beginner'
-       ? 'Focus on fundamental concepts, clear terminology, accessible analogies, and foundational recall.'
+       ? 'Focus on fundamental concepts, intuitive terminology, and accessible real-world analogies.'
        : difficulty === 'intermediate'
        ? 'Focus on mechanisms, trade-offs, practical application, comparing alternatives, and operational nuances.'
        : 'Focus on advanced scenarios, system constraints, performance bottlenecks, edge cases, and deep analytical problem-solving.'
-   }
-6. High Pedagogy Standards:
-   - Make questions challenging and educational.
-   - Avoid trivial true/false questions in quizzes.
-   - Summaries must synthesize, not merely repeat.`;
+   }`;
 
   const userPrompt = `Study Material / Topic:
 """
@@ -55,13 +69,13 @@ ${notes}
 Target Difficulty: ${difficulty}
 Requested Content Blocks: ${selectedTypes.join(', ')}
 
-Generate the structured JSON response now.`;
+Respond with the complete, valid JSON object now.`;
 
   return { systemInstruction, userPrompt };
 }
 
 /**
- * Builds the refinement prompt for updating an existing study session based on user feedback.
+ * Builds the refinement prompt for updating an existing study session based on user feedback via DeepSeek.
  */
 export function buildRefinementPrompt(
   currentTitle: string,
@@ -72,16 +86,17 @@ export function buildRefinementPrompt(
   const systemInstruction = `You are ReWise, an elite AI Active Learning Architect.
 The user wants to refine and update their existing structured study session according to a specific follow-up instruction.
 
-CRITICAL INSTRUCTIONS:
-1. Return STRICT VALID JSON ONLY. No markdown code fences, no introductory or trailing commentary.
-2. The root object MUST maintain the format:
-   {
-     "title": "...",
-     "blocks": [ ... ]
-   }
-3. Preserve the core knowledge while accurately executing the user's refinement (e.g., adding questions, increasing question difficulty, adding more flashcards, simplifying the summary, or tailoring examples).
-4. Maintain all schema constraints:
-   - Every quiz question MUST have at least 4 options and a valid zero-based correctAnswerIndex.
+CRITICAL INSTRUCTIONS FOR JSON OUTPUT:
+1. Return a STRICT VALID JSON OBJECT ONLY.
+2. Do not wrap with markdown backticks or commentary outside JSON.
+3. The root object MUST maintain the format:
+{
+  "title": "Updated Title",
+  "blocks": [ ... ]
+}
+4. Preserve the core concepts while accurately executing the user's refinement (e.g., adding questions, increasing quiz difficulty, adding flashcards, or simplifying the summary).
+5. Maintain all schema constraints:
+   - Every quiz question MUST have at least 4 options and a valid 0-based correctAnswerIndex.
    - Every block must have a valid "type" ("summary" | "flashcards" | "quiz" | "checklist").`;
 
   const userPrompt = `Current Session:
@@ -93,7 +108,7 @@ ${JSON.stringify(currentBlocks, null, 2)}
 User Refinement Request:
 "${instruction}"
 
-Output the complete, updated structured JSON containing the refined blocks.`;
+Output the complete, updated structured JSON object containing the refined blocks.`;
 
   return { systemInstruction, userPrompt };
 }
