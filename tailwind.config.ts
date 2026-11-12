@@ -10,29 +10,35 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: '#0a0d14',
+        background: {
+          DEFAULT: '#050505',
+          pure: '#000000',
+          sidebar: '#080808',
+          secondary: '#0B0B0B',
+        },
         card: {
-          DEFAULT: '#111726',
-          elevated: '#172033',
-          border: '#1f293d',
+          DEFAULT: '#101010',
+          secondary: '#141414',
+          elevated: '#181818',
+          hover: '#1D1D1D',
+          border: '#252525',
         },
-        primary: {
-          50: '#eef2ff',
-          100: '#e0e7ff',
-          200: '#c7d2fe',
-          300: '#a5b4fc',
-          400: '#818cf8',
-          500: '#6366f1',
-          600: '#4f46e5',
-          700: '#4338ca',
-          800: '#3730a3',
-          900: '#312e81',
+        border: {
+          DEFAULT: '#252525',
+          subtle: '#1F1F1F',
+          active: '#444444',
         },
-        accent: {
-          cyan: '#06b6d4',
-          emerald: '#10b981',
-          amber: '#f59e0b',
-          rose: '#f43f5e',
+        surface: {
+          1: '#101010',
+          2: '#141414',
+          3: '#181818',
+          hover: '#1D1D1D',
+        },
+        text: {
+          primary: '#F5F5F5',
+          secondary: '#A3A3A3',
+          muted: '#737373',
+          disabled: '#525252',
         },
       },
       fontFamily: {
@@ -46,12 +52,11 @@ const config: Config = {
         ],
       },
       animation: {
-        'pulse-subtle': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'fade-in': 'fadeIn 0.25s ease-out forwards',
+        'fade-in': 'fadeIn 0.2s ease-out forwards',
       },
       keyframes: {
         fadeIn: {
-          '0%': { opacity: '0', transform: 'translateY(4px)' },
+          '0%': { opacity: '0', transform: 'translateY(2px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
       },

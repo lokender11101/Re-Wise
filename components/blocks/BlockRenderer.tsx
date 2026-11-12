@@ -74,7 +74,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
 
     default:
       return (
-        <div className="p-4 rounded-xl border border-rose-800 bg-rose-950/20 text-xs text-rose-300">
+        <div className="p-4 rounded-xl border border-[#331F1F] bg-[#141010] text-xs text-[#FCA5A5]">
           Unsupported block format encountered: {(block as { type?: string })?.type || 'unknown'}
         </div>
       );

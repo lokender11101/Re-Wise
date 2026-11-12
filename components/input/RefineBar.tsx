@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Sparkles, ArrowRight, CornerDownLeft } from 'lucide-react';
+import { Sparkles, CornerDownLeft } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 export interface RefineBarProps {
@@ -32,16 +32,16 @@ export const RefineBar: React.FC<RefineBarProps> = ({ onRefine, isLoading = fals
   };
 
   return (
-    <div className="p-5 md:p-6 rounded-2xl bg-card border border-indigo-900/40 shadow-xl space-y-4">
-      <div className="flex items-center gap-2">
-        <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400">
+    <div className="p-5 md:p-6 rounded-2xl bg-[#101010] border border-[#252525] space-y-4">
+      <div className="flex items-center gap-2.5">
+        <div className="p-2 rounded-lg bg-[#181818] border border-[#252525] text-[#F5F5F5]">
           <Sparkles className="w-4 h-4" />
         </div>
         <div>
-          <h3 className="text-sm md:text-base font-bold text-slate-100">
+          <h3 className="text-sm md:text-base font-semibold text-[#F5F5F5]">
             AI Content Refinement Loop
           </h3>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-[#737373]">
             Iterate and adapt this session with follow-up instructions without starting over
           </p>
         </div>
@@ -55,7 +55,7 @@ export const RefineBar: React.FC<RefineBarProps> = ({ onRefine, isLoading = fals
             type="button"
             disabled={isLoading}
             onClick={() => handleSelectChip(prompt)}
-            className="text-[11px] px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:border-indigo-500/50 hover:bg-slate-850 transition-colors disabled:opacity-50"
+            className="text-[11px] px-3 py-1.5 rounded-lg bg-[#141414] border border-[#252525] text-[#A3A3A3] hover:text-[#F5F5F5] hover:border-[#444444] hover:bg-[#181818] transition-colors disabled:opacity-40"
           >
             + {prompt}
           </button>
@@ -71,7 +71,7 @@ export const RefineBar: React.FC<RefineBarProps> = ({ onRefine, isLoading = fals
             onChange={(e) => setInstruction(e.target.value)}
             disabled={isLoading}
             placeholder="Type a refinement instruction (e.g., 'Add questions testing priority inversion')..."
-            className="w-full rounded-xl bg-slate-950 border border-slate-700/80 px-4 py-2.5 text-xs md:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+            className="w-full rounded-xl bg-[#080808] border border-[#252525] px-4 py-2.5 text-xs md:text-sm text-[#F5F5F5] placeholder-[#525252] focus:outline-none focus:border-[#444444] focus:ring-1 focus:ring-[#444444] transition-all"
           />
         </div>
 
@@ -82,7 +82,7 @@ export const RefineBar: React.FC<RefineBarProps> = ({ onRefine, isLoading = fals
           isLoading={isLoading}
           disabled={instruction.trim().length < 3 || isLoading}
           rightIcon={<CornerDownLeft className="w-3.5 h-3.5" />}
-          className="bg-indigo-600 hover:bg-indigo-500 shrink-0"
+          className="shrink-0 font-semibold"
         >
           Refine
         </Button>

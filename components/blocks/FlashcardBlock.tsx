@@ -86,18 +86,18 @@ export const FlashcardBlock: React.FC<FlashcardBlockProps> = ({
   const learningCount = cards.filter((c) => progressMap[c.id] === 'learning').length;
 
   return (
-    <Card className="space-y-5 animate-fadeIn border-cyan-900/30">
+    <Card className="space-y-5 animate-fade-in border-[#252525] bg-[#101010]">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-card-border/60 pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#1F1F1F] pb-4">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-            <Layers className="w-5 h-5" />
+          <div className="p-2 rounded-lg bg-[#181818] border border-[#252525] text-[#F5F5F5]">
+            <Layers className="w-4 h-4" />
           </div>
           <div>
-            <span className="text-[11px] font-semibold tracking-wider text-cyan-400 uppercase">
+            <span className="text-[10px] font-medium tracking-wider text-[#737373] uppercase">
               Active Recall
             </span>
-            <h3 className="text-lg md:text-xl font-bold text-slate-100">
+            <h3 className="text-base md:text-lg font-semibold text-[#F5F5F5]">
               Interactive Flashcards
             </h3>
           </div>
@@ -108,12 +108,12 @@ export const FlashcardBlock: React.FC<FlashcardBlockProps> = ({
           <button
             type="button"
             onClick={handleShuffle}
-            className="p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-lg transition-colors border border-slate-700/60"
+            className="p-1.5 text-[#737373] hover:text-[#F5F5F5] hover:bg-[#141414] rounded-lg transition-colors border border-[#252525]"
             title="Shuffle flashcards"
           >
-            <Shuffle className="w-4 h-4" />
+            <Shuffle className="w-3.5 h-3.5" />
           </button>
-          <div className="px-3 py-1 bg-slate-800/80 rounded-lg text-xs font-mono font-medium text-slate-300 border border-slate-700/80">
+          <div className="px-2.5 py-1 bg-[#141414] rounded-lg text-xs font-mono font-medium text-[#A3A3A3] border border-[#252525]">
             {currentIndex + 1} / {totalCards}
           </div>
         </div>
@@ -121,24 +121,24 @@ export const FlashcardBlock: React.FC<FlashcardBlockProps> = ({
 
       {/* Mastery Progress Bar */}
       <div className="space-y-1.5">
-        <div className="flex justify-between text-xs text-slate-400">
+        <div className="flex justify-between text-xs text-[#737373]">
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-400" />
-            Mastered: {knownCount}
+            <span className="w-1.5 h-1.5 rounded-full bg-white" />
+            Mastered: <span className="text-[#A3A3A3] font-mono">{knownCount}</span>
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-amber-400" />
-            Review: {learningCount}
+            <span className="w-1.5 h-1.5 rounded-full bg-[#525252]" />
+            Review: <span className="text-[#A3A3A3] font-mono">{learningCount}</span>
           </span>
-          <span>Remaining: {totalCards - (knownCount + learningCount)}</span>
+          <span>Remaining: <span className="text-[#A3A3A3] font-mono">{totalCards - (knownCount + learningCount)}</span></span>
         </div>
-        <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden flex">
+        <div className="h-1 w-full bg-[#181818] rounded-full overflow-hidden flex">
           <div
-            className="bg-emerald-500 transition-all duration-300"
+            className="bg-white transition-all duration-300"
             style={{ width: `${(knownCount / totalCards) * 100}%` }}
           />
           <div
-            className="bg-amber-500 transition-all duration-300"
+            className="bg-[#525252] transition-all duration-300"
             style={{ width: `${(learningCount / totalCards) * 100}%` }}
           />
         </div>
@@ -156,23 +156,14 @@ export const FlashcardBlock: React.FC<FlashcardBlockProps> = ({
           }
         }}
         aria-label={`Flashcard: ${isFlipped ? 'Answer' : 'Question'}. Click to flip.`}
-        className="relative w-full min-h-[240px] md:min-h-[280px] cursor-pointer select-none rounded-2xl p-6 md:p-8 flex flex-col justify-between transition-all duration-300 bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-700/80 hover:border-cyan-500/50 shadow-xl group"
+        className="relative w-full min-h-[220px] md:min-h-[260px] cursor-pointer select-none rounded-2xl p-6 md:p-8 flex flex-col justify-between transition-all duration-200 bg-[#0C0C0C] border border-[#252525] hover:border-[#444444] group"
       >
         {/* Card Top Row */}
         <div className="flex items-center justify-between text-xs">
           <div className="flex items-center gap-2">
-            <span className="font-mono text-slate-500">#{currentIndex + 1}</span>
+            <span className="font-mono text-[#525252]">#{currentIndex + 1}</span>
             {currentCard?.difficulty && (
-              <Badge
-                variant={
-                  currentCard.difficulty === 'easy'
-                    ? 'success'
-                    : currentCard.difficulty === 'medium'
-                    ? 'warning'
-                    : 'danger'
-                }
-                size="sm"
-              >
+              <Badge variant="neutral" size="sm">
                 {currentCard.difficulty}
               </Badge>
             )}
@@ -180,12 +171,12 @@ export const FlashcardBlock: React.FC<FlashcardBlockProps> = ({
 
           <div className="flex items-center gap-2">
             {cardStatus === 'known' && (
-              <Badge variant="success">
+              <Badge variant="primary">
                 <CheckCircle2 className="w-3 h-3 inline mr-1" /> Mastered
               </Badge>
             )}
             {cardStatus === 'learning' && (
-              <Badge variant="warning">
+              <Badge variant="neutral">
                 <HelpCircle className="w-3 h-3 inline mr-1" /> Needs Review
               </Badge>
             )}
@@ -193,24 +184,24 @@ export const FlashcardBlock: React.FC<FlashcardBlockProps> = ({
         </div>
 
         {/* Card Body (Question or Answer) */}
-        <div className="my-auto py-6 text-center">
-          <div className="text-xs uppercase tracking-wider font-semibold mb-2 text-cyan-400">
+        <div className="my-auto py-5 text-center">
+          <div className="text-[11px] uppercase tracking-wider font-semibold mb-2 text-[#737373]">
             {isFlipped ? 'Answer' : 'Question'}
           </div>
-          <p className="text-base md:text-xl font-medium text-slate-100 leading-relaxed max-w-2xl mx-auto">
+          <p className="text-base md:text-lg font-medium text-[#F5F5F5] leading-relaxed max-w-2xl mx-auto">
             {isFlipped ? currentCard?.answer : currentCard?.question}
           </p>
         </div>
 
         {/* Card Bottom Hint */}
-        <div className="flex items-center justify-center gap-1.5 text-xs text-slate-500 group-hover:text-cyan-400/80 transition-colors">
+        <div className="flex items-center justify-center gap-1.5 text-xs text-[#525252] group-hover:text-[#A3A3A3] transition-colors">
           <RotateCw className="w-3.5 h-3.5" />
           <span>Click or press Space to {isFlipped ? 'view question' : 'reveal answer'}</span>
         </div>
       </div>
 
       {/* Navigation & Tagging Controls */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
         {/* Previous / Next buttons */}
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <Button
@@ -238,20 +229,20 @@ export const FlashcardBlock: React.FC<FlashcardBlockProps> = ({
         {/* Mastery Tagging Buttons */}
         <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
           <Button
-            variant={cardStatus === 'learning' ? 'danger' : 'outline'}
+            variant={cardStatus === 'learning' ? 'secondary' : 'outline'}
             size="sm"
             onClick={handleMarkReview}
-            leftIcon={<HelpCircle className="w-3.5 h-3.5 text-amber-400" />}
-            className="flex-1 sm:flex-initial text-xs"
+            leftIcon={<HelpCircle className="w-3.5 h-3.5 text-[#737373]" />}
+            className={`flex-1 sm:flex-initial text-xs ${cardStatus === 'learning' ? 'bg-[#252525] border-[#444444] text-white' : ''}`}
           >
             Needs Review (2)
           </Button>
           <Button
-            variant={cardStatus === 'known' ? 'success' : 'outline'}
+            variant={cardStatus === 'known' ? 'secondary' : 'outline'}
             size="sm"
             onClick={handleMarkKnown}
-            leftIcon={<CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />}
-            className="flex-1 sm:flex-initial text-xs"
+            leftIcon={<CheckCircle2 className="w-3.5 h-3.5 text-white" />}
+            className={`flex-1 sm:flex-initial text-xs ${cardStatus === 'known' ? 'bg-[#252525] border-[#444444] text-white' : ''}`}
           >
             Mastered (1)
           </Button>
@@ -259,14 +250,14 @@ export const FlashcardBlock: React.FC<FlashcardBlockProps> = ({
       </div>
 
       {/* Keyboard Shortcuts Legend */}
-      <div className="hidden md:flex items-center justify-center gap-4 text-[11px] text-slate-500 pt-2 border-t border-card-border/40">
+      <div className="hidden md:flex items-center justify-center gap-4 text-[11px] text-[#525252] pt-2 border-t border-[#1F1F1F]">
         <span className="flex items-center gap-1">
           <Keyboard className="w-3 h-3" /> Shortcuts:
         </span>
-        <span><kbd className="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700">Space</kbd> Flip</span>
-        <span><kbd className="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700">←</kbd> <kbd className="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700">→</kbd> Navigate</span>
-        <span><kbd className="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700">1</kbd> Mastered</span>
-        <span><kbd className="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700">2</kbd> Review</span>
+        <span><kbd className="px-1.5 py-0.5 bg-[#141414] rounded border border-[#252525]">Space</kbd> Flip</span>
+        <span><kbd className="px-1.5 py-0.5 bg-[#141414] rounded border border-[#252525]">←</kbd> <kbd className="px-1.5 py-0.5 bg-[#141414] rounded border border-[#252525]">→</kbd> Navigate</span>
+        <span><kbd className="px-1.5 py-0.5 bg-[#141414] rounded border border-[#252525]">1</kbd> Mastered</span>
+        <span><kbd className="px-1.5 py-0.5 bg-[#141414] rounded border border-[#252525]">2</kbd> Review</span>
       </div>
     </Card>
   );

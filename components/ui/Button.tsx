@@ -28,27 +28,27 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      'inline-flex items-center justify-center font-medium transition-all duration-150 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed select-none active:scale-[0.98]';
+      'inline-flex items-center justify-center font-medium transition-all duration-150 rounded-xl focus:outline-none focus-visible:ring-1 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 focus-visible:ring-offset-black disabled:opacity-40 disabled:cursor-not-allowed select-none active:scale-[0.98]';
 
     const sizeStyles = {
       sm: 'text-xs px-3 py-1.5 gap-1.5 min-h-[32px]',
       md: 'text-sm px-4 py-2.5 gap-2 min-h-[40px]',
-      lg: 'text-base px-5 py-3 gap-2.5 min-h-[48px]',
+      lg: 'text-base px-5 py-3 gap-2.5 min-h-[46px]',
     };
 
     const variantStyles = {
       primary:
-        'bg-primary-600 hover:bg-primary-500 text-white shadow-lg shadow-primary-600/20 hover:shadow-primary-600/30 border border-primary-500/40',
+        'bg-white text-black hover:bg-[#E5E5E5] active:bg-[#D4D4D4] border border-transparent font-semibold shadow-none',
       secondary:
-        'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 shadow-sm',
+        'bg-[#181818] hover:bg-[#1D1D1D] text-[#F5F5F5] border border-[#252525] hover:border-[#383838]',
       outline:
-        'bg-transparent hover:bg-slate-800/60 text-slate-300 border border-slate-700 hover:border-slate-600 hover:text-white',
+        'bg-transparent hover:bg-[#141414] text-[#A3A3A3] hover:text-[#F5F5F5] border border-[#252525] hover:border-[#444444]',
       ghost:
-        'bg-transparent hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 border border-transparent',
+        'bg-transparent hover:bg-[#141414] text-[#737373] hover:text-[#F5F5F5] border border-transparent',
       danger:
-        'bg-rose-600/90 hover:bg-rose-500 text-white border border-rose-500/40 shadow-sm',
+        'bg-[#141010] hover:bg-[#1C1414] text-[#FCA5A5] border border-[#331F1F] hover:border-[#5C2424]',
       success:
-        'bg-emerald-600/90 hover:bg-emerald-500 text-white border border-emerald-500/40 shadow-sm',
+        'bg-[#101411] hover:bg-[#141C16] text-[#86EFAC] border border-[#1F3325] hover:border-[#284E33]',
     };
 
     return (

@@ -21,25 +21,25 @@ export const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
   const stats = calculateChecklistStats(items, progressMap);
 
   return (
-    <Card className="space-y-5 animate-fadeIn border-emerald-900/30">
+    <Card className="space-y-5 animate-fade-in border-[#252525] bg-[#101010]">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-card-border/60 pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#1F1F1F] pb-4">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-            <CheckSquare className="w-5 h-5" />
+          <div className="p-2 rounded-lg bg-[#181818] border border-[#252525] text-[#F5F5F5]">
+            <CheckSquare className="w-4 h-4" />
           </div>
           <div>
-            <span className="text-[11px] font-semibold tracking-wider text-emerald-400 uppercase">
+            <span className="text-[10px] font-medium tracking-wider text-[#737373] uppercase">
               Mastery Verification
             </span>
-            <h3 className="text-lg md:text-xl font-bold text-slate-100">{block.title}</h3>
+            <h3 className="text-base md:text-lg font-semibold text-[#F5F5F5]">{block.title}</h3>
           </div>
         </div>
 
         {/* Counter */}
-        <div className="text-xs text-slate-400">
+        <div className="text-xs text-[#737373]">
           Completed:{' '}
-          <strong className="text-emerald-400 font-mono text-sm">
+          <strong className="text-[#F5F5F5] font-mono text-sm">
             {stats.completedCount}
           </strong>{' '}
           / {stats.total} ({stats.percentage}%)
@@ -48,16 +48,16 @@ export const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
 
       {/* Progress Bar */}
       <div className="space-y-1">
-        <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+        <div className="h-1 w-full bg-[#181818] rounded-full overflow-hidden">
           <div
-            className="h-full bg-emerald-500 transition-all duration-300 rounded-full"
+            className="h-full bg-white transition-all duration-300 rounded-full"
             style={{ width: `${stats.percentage}%` }}
           />
         </div>
       </div>
 
       {/* Checklist items */}
-      <div className="space-y-2.5">
+      <div className="space-y-2">
         {items.map((item) => {
           const isChecked = progressMap[item.id] === true;
 
@@ -68,23 +68,23 @@ export const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
               onClick={() => onToggleItem?.(item.id)}
               className={`w-full text-left p-3.5 rounded-xl border transition-all text-xs md:text-sm flex items-start gap-3 select-none ${
                 isChecked
-                  ? 'bg-emerald-950/20 border-emerald-900/40 text-slate-400'
-                  : 'bg-slate-900/40 border-card-border/80 hover:border-slate-700 text-slate-200'
+                  ? 'bg-[#0A0A0A] border-[#1A1A1A] text-[#525252]'
+                  : 'bg-[#121212] border-[#1F1F1F] hover:border-[#333333] text-[#F5F5F5]'
               }`}
             >
               <div
-                className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 border transition-colors ${
+                className={`w-4 h-4 rounded-md flex items-center justify-center shrink-0 mt-0.5 border transition-colors ${
                   isChecked
-                    ? 'bg-emerald-500 border-emerald-500 text-slate-950'
-                    : 'border-slate-600 bg-slate-800/80 text-transparent'
+                    ? 'bg-white border-white text-black'
+                    : 'border-[#252525] bg-[#181818] text-transparent'
                 }`}
               >
-                {isChecked ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : <Square className="w-3 h-3" />}
+                {isChecked ? <Check className="w-3 h-3 stroke-[3]" /> : <Square className="w-2.5 h-2.5" />}
               </div>
 
               <span
                 className={`flex-1 leading-relaxed transition-all ${
-                  isChecked ? 'line-through text-slate-500' : 'text-slate-200 font-medium'
+                  isChecked ? 'line-through text-[#525252]' : 'text-[#D4D4D4] font-medium'
                 }`}
               >
                 {item.text}

@@ -16,22 +16,22 @@ export const Badge: React.FC<BadgeProps> = ({
   ...props
 }) => {
   const sizeStyles = {
-    sm: 'text-xs px-2.5 py-0.5 rounded-full font-medium',
-    md: 'text-sm px-3 py-1 rounded-full font-medium',
+    sm: 'text-[11px] px-2.5 py-0.5 rounded-full font-medium tracking-wide',
+    md: 'text-xs px-3 py-1 rounded-full font-medium tracking-wide',
   };
 
   const variantStyles = {
-    neutral: 'bg-slate-800 text-slate-300 border border-slate-700',
-    primary: 'bg-primary-950/80 text-primary-300 border border-primary-800/60',
-    success: 'bg-emerald-950/80 text-emerald-300 border border-emerald-800/60',
-    warning: 'bg-amber-950/80 text-amber-300 border border-amber-800/60',
-    danger: 'bg-rose-950/80 text-rose-300 border border-rose-800/60',
-    cyan: 'bg-cyan-950/80 text-cyan-300 border border-cyan-800/60',
+    neutral: 'bg-[#181818] text-[#A3A3A3] border border-[#252525]',
+    primary: 'bg-[#202020] text-[#F5F5F5] border border-[#383838]',
+    cyan: 'bg-[#181818] text-[#E5E5E5] border border-[#2B2B2B]',
+    success: 'bg-[#101411] text-[#86EFAC] border border-[#1F3325]',
+    warning: 'bg-[#141210] text-[#FDE047] border border-[#332A1F]',
+    danger: 'bg-[#141010] text-[#FCA5A5] border border-[#331F1F]',
   };
 
   return (
     <span
-      className={clsx('inline-flex items-center gap-1.5 uppercase tracking-wider', sizeStyles[size], variantStyles[variant], className)}
+      className={clsx('inline-flex items-center gap-1.5 uppercase', sizeStyles[size], variantStyles[variant], className)}
       {...props}
     >
       {children}

@@ -37,7 +37,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-background text-slate-100 flex flex-col md:flex-row font-sans selection:bg-primary-500/30 selection:text-white">
+    <div className="min-h-screen bg-[#050505] text-[#F5F5F5] flex flex-col md:flex-row font-sans selection:bg-[#333333] selection:text-white">
       {/* Sidebar for Desktop & Mobile drawer */}
       <Sidebar
         sessions={sessions}

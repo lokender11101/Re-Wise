@@ -38,19 +38,19 @@ export const SavedSessionsModal: React.FC<SavedSessionsModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-card-elevated border border-card-border rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+      <div className="bg-[#101010] border border-[#252525] rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
         {/* Modal Header */}
-        <div className="flex items-center justify-between p-5 border-b border-card-border/80">
+        <div className="flex items-center justify-between p-5 border-b border-[#1F1F1F]">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400">
-              <BookOpen className="w-5 h-5" />
+            <div className="p-2 rounded-xl bg-[#181818] border border-[#252525] text-[#F5F5F5]">
+              <BookOpen className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-base md:text-lg font-bold text-slate-100">
+              <h3 className="text-base font-semibold text-[#F5F5F5]">
                 Saved Study Sessions
               </h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-[#737373]">
                 {sessions.length} session{sessions.length !== 1 ? 's' : ''} stored locally in browser
               </p>
             </div>
@@ -59,19 +59,19 @@ export const SavedSessionsModal: React.FC<SavedSessionsModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-200 rounded-lg hover:bg-slate-800 transition-colors"
+            className="p-1.5 text-[#737373] hover:text-[#F5F5F5] rounded-lg hover:bg-[#181818] transition-colors"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Sessions list */}
-        <div className="p-5 overflow-y-auto space-y-3 flex-1">
+        <div className="p-5 overflow-y-auto space-y-2.5 flex-1">
           {sessions.length === 0 ? (
-            <div className="text-center py-12 space-y-3 text-slate-400">
-              <Layers className="w-8 h-8 mx-auto text-slate-600" />
+            <div className="text-center py-12 space-y-3 text-[#737373]">
+              <Layers className="w-8 h-8 mx-auto text-[#333333]" />
               <p className="text-sm">No saved study sessions found yet.</p>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-[#525252]">
                 Generate your first study session to automatically persist it here.
               </p>
             </div>
@@ -95,30 +95,30 @@ export const SavedSessionsModal: React.FC<SavedSessionsModalProps> = ({
                   }}
                   className={`p-4 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-4 group ${
                     isActive
-                      ? 'bg-indigo-950/40 border-indigo-500/80 shadow-md'
-                      : 'bg-card border-card-border hover:border-slate-600 hover:bg-slate-850'
+                      ? 'bg-[#181818] border-[#444444]'
+                      : 'bg-[#121212] border-[#1F1F1F] hover:border-[#333333] hover:bg-[#161616]'
                   }`}
                 >
                   <div className="space-y-1.5 min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <h4 className="font-semibold text-slate-200 text-sm group-hover:text-primary-300 transition-colors truncate">
+                      <h4 className="font-medium text-[#F5F5F5] text-sm group-hover:text-white transition-colors truncate">
                         {item.title}
                       </h4>
                       {isActive && (
-                        <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded bg-indigo-500 text-white shrink-0">
+                        <span className="text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded bg-white text-black shrink-0">
                           Active
                         </span>
                       )}
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400">
-                      <Badge size="sm" variant={item.difficulty === 'beginner' ? 'success' : item.difficulty === 'intermediate' ? 'primary' : 'danger'}>
+                    <div className="flex flex-wrap items-center gap-3 text-xs text-[#737373]">
+                      <Badge size="sm" variant="neutral">
                         {item.difficulty}
                       </Badge>
                       <span className="flex items-center gap-1 text-[11px]">
                         <Calendar className="w-3 h-3" /> {formattedDate}
                       </span>
-                      <span className="text-emerald-400 font-mono text-[11px] font-semibold">
+                      <span className="text-[#A3A3A3] font-mono text-[11px] font-medium">
                         {mastery}% mastery
                       </span>
                     </div>
@@ -129,12 +129,12 @@ export const SavedSessionsModal: React.FC<SavedSessionsModalProps> = ({
                     <button
                       type="button"
                       onClick={(e) => handleDelete(e, item.id)}
-                      className="p-2 text-slate-500 hover:text-rose-400 rounded-lg hover:bg-rose-950/30 transition-colors"
+                      className="p-2 text-[#737373] hover:text-[#FCA5A5] rounded-lg hover:bg-[#1C1414] transition-colors"
                       title="Delete session"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
-                    <div className="p-2 text-slate-400 group-hover:text-primary-400 transition-colors">
+                    <div className="p-1.5 text-[#525252] group-hover:text-white transition-colors">
                       <ArrowRight className="w-4 h-4" />
                     </div>
                   </div>
@@ -145,7 +145,7 @@ export const SavedSessionsModal: React.FC<SavedSessionsModalProps> = ({
         </div>
 
         {/* Modal Footer */}
-        <div className="p-4 border-t border-card-border/80 flex justify-end bg-card">
+        <div className="p-4 border-t border-[#1F1F1F] flex justify-end bg-[#101010]">
           <Button variant="secondary" size="sm" onClick={onClose}>
             Close
           </Button>

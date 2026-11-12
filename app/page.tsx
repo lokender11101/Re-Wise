@@ -144,7 +144,7 @@ export default function ReWiseDashboard() {
 
         {/* Input Panel (always shown if no session or if user clicks "New Session") */}
         {(!session || showInputPanel) && !isGenerating && (
-          <div className="space-y-6 animate-fadeIn">
+          <div className="space-y-6 animate-fade-in">
             <NotesInput onGenerate={handleGenerate} isLoading={isGenerating} />
             {!session && (
               <EmptyState
@@ -160,7 +160,7 @@ export default function ReWiseDashboard() {
 
         {/* Active Session Content */}
         {session && !isGenerating && (
-          <div className="space-y-6 animate-fadeIn">
+          <div className="space-y-6 animate-fade-in">
             {/* Session Header & Overview */}
             <SessionOverview
               session={session}

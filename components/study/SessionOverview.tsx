@@ -50,24 +50,16 @@ export const SessionOverview: React.FC<SessionOverviewProps> = ({
   });
 
   return (
-    <div className="p-5 md:p-6 rounded-2xl bg-gradient-to-r from-card to-card-elevated border border-card-border/80 shadow-lg space-y-4">
+    <div className="p-5 md:p-6 rounded-2xl bg-[#101010] border border-[#252525] space-y-4">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         {/* Title & Metadata */}
         <div className="space-y-2 flex-1 min-w-0">
           <div className="flex items-center gap-2.5">
-            <Badge
-              variant={
-                session.difficulty === 'beginner'
-                  ? 'success'
-                  : session.difficulty === 'intermediate'
-                  ? 'primary'
-                  : 'danger'
-              }
-            >
+            <Badge variant="neutral" size="sm">
               {session.difficulty}
             </Badge>
 
-            <span className="flex items-center gap-1 text-xs text-slate-400">
+            <span className="flex items-center gap-1 text-xs text-[#737373]">
               <Calendar className="w-3.5 h-3.5" />
               {formattedDate}
             </span>
@@ -81,20 +73,20 @@ export const SessionOverview: React.FC<SessionOverviewProps> = ({
                 value={editedTitle}
                 onChange={(e) => setEditedTitle(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSaveTitle()}
-                className="text-xl font-bold bg-slate-900 border border-primary-500 rounded-lg px-3 py-1 text-white focus:outline-none w-full max-w-lg"
+                className="text-lg md:text-xl font-semibold bg-[#0A0A0A] border border-[#444444] rounded-lg px-3 py-1 text-white focus:outline-none w-full max-w-lg"
                 autoFocus
               />
               <button
                 type="button"
                 onClick={handleSaveTitle}
-                className="p-1.5 rounded-lg bg-primary-600 text-white hover:bg-primary-500"
+                className="p-1.5 rounded-lg bg-white text-black hover:bg-[#E5E5E5]"
               >
                 <Check className="w-4 h-4" />
               </button>
             </div>
           ) : (
             <div className="flex items-center gap-2 group">
-              <h2 className="text-xl md:text-2xl font-bold text-slate-100 truncate">
+              <h2 className="text-xl md:text-2xl font-semibold text-[#F5F5F5] truncate">
                 {session.title}
               </h2>
               <button
@@ -103,7 +95,7 @@ export const SessionOverview: React.FC<SessionOverviewProps> = ({
                   setEditedTitle(session.title);
                   setIsEditingTitle(true);
                 }}
-                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-slate-400 hover:text-slate-200"
+                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-[#737373] hover:text-[#F5F5F5]"
                 title="Rename study session"
               >
                 <Edit2 className="w-3.5 h-3.5" />
@@ -128,8 +120,8 @@ export const SessionOverview: React.FC<SessionOverviewProps> = ({
             size="sm"
             variant="outline"
             onClick={onDeleteSession}
-            leftIcon={<Trash2 className="w-3.5 h-3.5 text-rose-400" />}
-            className="hover:border-rose-500/50 hover:bg-rose-950/20"
+            leftIcon={<Trash2 className="w-3.5 h-3.5 text-[#737373]" />}
+            className="hover:border-[#331F1F] hover:bg-[#141010] hover:text-[#FCA5A5]"
             title="Delete this study session"
           >
             Delete
@@ -140,6 +132,7 @@ export const SessionOverview: React.FC<SessionOverviewProps> = ({
             variant="primary"
             onClick={onNewSession}
             leftIcon={<Plus className="w-3.5 h-3.5" />}
+            className="font-semibold"
           >
             New Session
           </Button>
