@@ -68,8 +68,8 @@ export const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
               onClick={() => onToggleItem?.(item.id)}
               className={`w-full text-left p-4 rounded-xl border transition-all text-xs md:text-sm flex items-start gap-3.5 select-none ${
                 isChecked
-                  ? 'bg-[#0B0B0B] border-[#1C1C1C] text-[#555555]'
-                  : 'bg-[#121212] border-[#222222] hover:border-[#383838] hover:bg-[#151515] text-[#F5F5F5]'
+                  ? 'bg-[#0E0E0E] border-[#1F1F1F]'
+                  : 'bg-[#121212] border-[#222222] hover:border-[#383838] hover:bg-[#151515]'
               }`}
             >
               <div
@@ -84,7 +84,7 @@ export const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
 
               <span
                 className={`flex-1 leading-relaxed transition-all ${
-                  isChecked ? 'line-through text-[#666666]' : 'text-[#E5E5E5] font-normal'
+                  isChecked ? 'text-[#D4D4D4] font-normal' : 'text-[#F5F5F5] font-normal'
                 }`}
               >
                 {item.text}
