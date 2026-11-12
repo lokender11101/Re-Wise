@@ -145,6 +145,11 @@ export function useStudySession() {
       refinementSnapshots: snapshots,
     };
 
+    setIsRetesting(false);
+    setRetestAnswers({});
+    setRetestSubmitted(false);
+    setRetestScoreResult(null);
+
     syncSession(updated);
     return true;
   }, [session, syncSession]);

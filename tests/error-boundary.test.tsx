@@ -23,7 +23,7 @@ describe('ErrorBoundary Component Suite', () => {
     expect(screen.getByText('Safe Content')).toBeDefined();
   });
 
-  it('catches render errors and displays defensive fallback UI without leaking stack traces', () => {
+  it('catches render errors and displays defensive fallback UI with generic error without leaking raw exceptions', () => {
     // Suppress console.error in test output for expected throw
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
@@ -34,7 +34,9 @@ describe('ErrorBoundary Component Suite', () => {
     );
 
     expect(screen.getByText('Custom Workspace Failure')).toBeDefined();
-    expect(screen.getByText('Component crashed during block rendering')).toBeDefined();
+    expect(screen.getByText('An unexpected component rendering error occurred.')).toBeDefined();
+    // Verify raw exception string is NOT leaked into the DOM
+    expect(screen.queryByText('Component crashed during block rendering')).toBeNull();
     expect(screen.getByText('Reset Workspace & Retry')).toBeDefined();
 
     consoleSpy.mockRestore();

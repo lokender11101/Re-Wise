@@ -24,15 +24,12 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     };
   }
 
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    // Sanitize message: never expose internal stack traces or secrets
-    const safeMessage = error?.message && error.message.length < 200
-      ? error.message
-      : 'An unexpected component rendering error occurred.';
-
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  static getDerivedStateFromError(_error: Error): ErrorBoundaryState {
+    // Secure generic message: strictly avoid leaking raw exception text, paths, or secrets
     return {
       hasError: true,
-      errorMessage: safeMessage,
+      errorMessage: 'An unexpected component rendering error occurred.',
     };
   }
 

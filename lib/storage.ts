@@ -87,11 +87,12 @@ export function getSavedSessions(): StudySession[] {
       if (parsedEnvelope && typeof parsedEnvelope === 'object' && 'schemaVersion' in parsedEnvelope) {
         const env = parsedEnvelope as { schemaVersion: number; sessions?: unknown[] };
 
-        // Handle unsupported future schema versions safely (do not overwrite)
+        // Handle unsupported future schema versions safely (prevent interpretation and overwrite)
         if (env.schemaVersion > CURRENT_STORAGE_VERSION) {
           console.warn(
-            `Storage schema version ${env.schemaVersion} is newer than supported (${CURRENT_STORAGE_VERSION}). Operating in safe read-only mode.`
+            `Storage schema version ${env.schemaVersion} is newer than supported (${CURRENT_STORAGE_VERSION}). Preventing unsupported storage data from being interpreted or overwritten.`
           );
+          return [];
         }
 
         if (Array.isArray(env.sessions)) {
@@ -157,6 +158,27 @@ function persistSessions(sessions: StudySession[]): boolean {
   if (typeof window === 'undefined') return false;
 
   try {
+    // Prevent overwriting unsupported future schema data
+    const existingRaw = window.localStorage.getItem(STORAGE_KEY_V2);
+    if (existingRaw) {
+      try {
+        const existingParsed = JSON.parse(existingRaw);
+        if (
+          existingParsed &&
+          typeof existingParsed === 'object' &&
+          typeof existingParsed.schemaVersion === 'number' &&
+          existingParsed.schemaVersion > CURRENT_STORAGE_VERSION
+        ) {
+          console.warn(
+            `Blocked storage overwrite: existing storage has unsupported future schema version (${existingParsed.schemaVersion} > ${CURRENT_STORAGE_VERSION}).`
+          );
+          return false;
+        }
+      } catch {
+        // If existing is not JSON, it is safe to overwrite
+      }
+    }
+
     const validated = SavedSessionsListSchema.safeParse(sessions);
     if (!validated.success) {
       console.error('Attempted to persist invalid session list:', validated.error);

@@ -47,14 +47,14 @@ Powered by **DeepSeek API** (`deepseek-flash`) using the official **OpenAI JavaS
   - **Frequently Missed Concepts**: Identifies concepts where accuracy is below mastery threshold or cards need review.
   - **Guard Clause**: Concept analytics are only displayed when enough authentic interactions exist, preventing premature or fabricated insights.
 
-### 7. Storage Versioning & Envelope Migration
+### 7. Storage Versioning & Future-Version Envelope Safety
 - **Versioned Envelope (`rewise_storage_v2`)**: Stored as `{ schemaVersion: 2, sessions: [...] }`.
 - **Automatic Migration**: Transparently detects legacy raw-array storage (`rewise_saved_sessions_v1`), validates and migrates records into version 2 format without erasing the original data.
-- **Future-Proof**: Detects and handles unsupported future schema versions in safe read-only mode without overwriting.
+- **Future-Version Safety**: Strictly prevents unsupported future storage schema versions (`schemaVersion > CURRENT_STORAGE_VERSION`) from being interpreted as valid sessions or overwritten by save/delete operations, guarding against data corruption across client versions.
 
 ### 8. Defensive React Error Boundary
 - **Isolated Workspace Protection**: Wraps the interactive dashboard in a resilient `<ErrorBoundary>` component (`components/ui/ErrorBoundary.tsx`).
-- **Sanitized User Messaging**: Displays a clean monochromatic failure card with a "Reset Workspace & Retry" recovery action, guarding against unhandled runtime crashes without leaking sensitive server stack traces.
+- **Sanitized User Messaging**: Displays a clean monochromatic failure card with a "Reset Workspace & Retry" recovery action, guarding against unhandled runtime crashes without leaking sensitive server stack traces or internal exception details.
 
 ### 9. Keyboard Accessibility Matrix
 - **Flashcards**:
@@ -181,7 +181,7 @@ rewise/
 - **Validation**: Zod (Discriminated unions, custom range refinements, envelope validation)
 - **Icons**: Lucide React
 - **Celebrations**: `canvas-confetti`
-- **Testing**: Vitest + JSDOM (53 deterministic unit tests + 2 live integration tests)
+- **Testing**: Vitest + JSDOM (64 deterministic unit tests across 12 test suites + 2 live integration tests)
 
 ---
 
@@ -247,13 +247,15 @@ npm test
 npm run test:unit
 ```
 
-Runs **53 tests across 10 test suites in ~1.8 seconds** with zero external network calls:
+Runs **64 tests across 12 test suites in ~1.8 seconds** with zero external network calls:
 - **`tests/chart.test.ts`**: Chart block schemas, non-empty data points, and bounds.
 - **`tests/sse-parser.test.ts`**: LF/CRLF frames, incomplete network chunk buffering, trailing flushes, malformed JSON rejection, and error event handling.
-- **`tests/storage-versioning.test.ts`**: Versioned envelope persistence, legacy v1 raw-array migration, and unsupported future version safety.
+- **`tests/streaming-reliability.test.ts`**: Client cancellation via `abort()`, interrupted streams, empty payloads, and HTTP error responses.
+- **`tests/deepseek-errors.test.ts`**: DeepSeek error classification (401 invalid key, missing key, 504 timeout, 429 rate limit, 502 empty AI response, 503 network drop).
+- **`tests/storage-versioning.test.ts`**: Versioned envelope persistence, legacy v1 raw-array migration, and blocking interpretation/overwriting on unsupported future versions.
 - **`tests/undo-refinement.test.ts`**: Bounded refinement snapshots, multiple undo steps, and preserving user progress.
 - **`tests/learning-analytics.test.ts`**: Concept-level accuracy, frequently missed concept detection, attempt progression deltas, and interaction guards.
-- **`tests/error-boundary.test.tsx`**: Defensive error catching, fallback rendering, and workspace reset handling.
+- **`tests/error-boundary.test.tsx`**: Defensive error catching, generic user fallback rendering without raw exception leakage, and workspace reset handling.
 - **`tests/retest.test.ts`**: Scoring, wrong-answer isolation, and full `allAnswered` validation with stale ID rejection.
 - **`tests/schemas.test.ts`**: Discriminated unions, codeblock stripping, and outermost JSON extraction.
 - **`tests/refinement-merge.test.ts`**: Stable ID preservation across refinement cycles.
@@ -273,7 +275,7 @@ Connects directly to the live DeepSeek API (`api.deepseek.com`) to verify end-to
 npm run test:all
 ```
 
-Runs all 55 tests (both deterministic unit suites and live DeepSeek integration suites).
+Runs all 66 tests (both deterministic unit suites and live DeepSeek integration suites).
 
 ---
 

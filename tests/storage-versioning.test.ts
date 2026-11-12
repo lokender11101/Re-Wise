@@ -145,15 +145,30 @@ describe('Storage Versioning & Session Migration Suite', () => {
     expect(window.localStorage.getItem('rewise_saved_sessions_v1')).not.toBeNull();
   });
 
-  it('safely handles unsupported future schema versions in read-only mode', () => {
+  it('prevents unsupported future schema versions from being interpreted or overwritten', () => {
     const futureEnvelope = {
       schemaVersion: 99,
+      futureMetadata: { experimentalFeature: true },
       sessions: [validV1LegacySession],
     };
     window.localStorage.setItem('rewise_storage_v2', JSON.stringify(futureEnvelope));
 
+    // 1. Prevent interpretation
     const sessions = getSavedSessions();
-    expect(sessions).toHaveLength(1);
-    expect(sessions[0].id).toBe('legacy-v1-session');
+    expect(sessions).toHaveLength(0);
+
+    // 2. Prevent overwrite: saving a new session should not overwrite future envelope
+    const newSession = {
+      ...validV1LegacySession,
+      id: 'session-to-save',
+      schemaVersion: 2,
+    } as StudySession;
+    saveSession(newSession);
+
+    const storedRaw = window.localStorage.getItem('rewise_storage_v2');
+    expect(storedRaw).not.toBeNull();
+    const storedParsed = JSON.parse(storedRaw!);
+    expect(storedParsed.schemaVersion).toBe(99);
+    expect(storedParsed.futureMetadata).toEqual({ experimentalFeature: true });
   });
 });
