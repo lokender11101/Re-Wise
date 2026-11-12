@@ -5,7 +5,7 @@
 
 export type DifficultyLevel = 'beginner' | 'intermediate' | 'advanced';
 
-export type ContentBlockType = 'summary' | 'flashcards' | 'quiz' | 'checklist';
+export type ContentBlockType = 'summary' | 'flashcards' | 'quiz' | 'checklist' | 'chart';
 
 // 1. Summary Block
 export interface SummaryBlock {
@@ -58,8 +58,27 @@ export interface ChecklistBlock {
   items: ChecklistItem[];
 }
 
+// 5. Chart Block (Quantitative & Comparative Analysis)
+export interface ChartDataPoint {
+  label: string;
+  value: number;
+  unit?: string;
+  description?: string;
+}
+
+export interface ChartBlock {
+  type: 'chart';
+  id: string;
+  title: string;
+  chartType: 'bar' | 'comparison' | 'distribution';
+  xAxisLabel?: string;
+  yAxisLabel?: string;
+  data: ChartDataPoint[];
+  summary: string;
+}
+
 // Discriminated Union of all supported learning blocks
-export type StudyBlock = SummaryBlock | FlashcardBlock | QuizBlock | ChecklistBlock;
+export type StudyBlock = SummaryBlock | FlashcardBlock | QuizBlock | ChecklistBlock | ChartBlock;
 
 // Overall AI Structured Generation Output
 export interface GenerationResponse {

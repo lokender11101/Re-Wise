@@ -144,3 +144,61 @@ export async function callDeepSeekStructured({
     );
   }
 }
+
+export interface DeepSeekStreamParams {
+  systemInstruction: string;
+  userPrompt: string;
+  timeoutMs?: number;
+  abortSignal?: AbortSignal;
+}
+
+/**
+ * Creates an asynchronous streaming completion from DeepSeek via OpenAI SDK.
+ */
+export async function createDeepSeekStream({
+  systemInstruction,
+  userPrompt,
+  timeoutMs = 60000,
+  abortSignal,
+}: DeepSeekStreamParams) {
+  const apiKey = process.env.DEEPSEEK_API_KEY?.trim();
+
+  if (!apiKey || apiKey === 'your_deepseek_api_key_here') {
+    throw new DeepSeekServiceError(
+      'DeepSeek API key is not configured. Please add DEEPSEEK_API_KEY to .env.local.',
+      'API_KEY_MISSING',
+      401,
+      false
+    );
+  }
+
+  const modelName = process.env.DEEPSEEK_MODEL || 'deepseek-flash';
+
+  const client = new OpenAI({
+    apiKey,
+    baseURL: 'https://api.deepseek.com',
+    timeout: timeoutMs,
+    maxRetries: 1,
+    dangerouslyAllowBrowser: true,
+  });
+
+  return await client.chat.completions.create(
+    {
+      model: modelName,
+      messages: [
+        {
+          role: 'system',
+          content: systemInstruction,
+        },
+        {
+          role: 'user',
+          content: userPrompt,
+        },
+      ],
+      response_format: { type: 'json_object' },
+      stream: true,
+      temperature: 0.3,
+    },
+    { signal: abortSignal }
+  );
+}

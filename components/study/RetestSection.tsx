@@ -131,7 +131,16 @@ export const RetestSection: React.FC<RetestSectionProps> = ({
           return (
             <div
               key={q.id}
-              className={`p-5 md:p-6 rounded-2xl border transition-all ${
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (submitted) return;
+                const num = parseInt(e.key, 10);
+                if (!isNaN(num) && num >= 1 && num <= q.options.length) {
+                  e.preventDefault();
+                  onRecordRetestAnswer(q.id, num - 1);
+                }
+              }}
+              className={`p-5 md:p-6 rounded-2xl border transition-all focus:outline-none focus:ring-1 focus:ring-[#555555] ${
                 submitted
                   ? isCorrect
                     ? 'bg-[#0E1410] border-[#1E3825]'

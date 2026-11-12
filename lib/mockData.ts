@@ -127,6 +127,21 @@ export const MOCK_GENERATION_RESPONSE: GenerationResponse = {
         { id: 'chk-5', text: 'Identify the three formal criteria for valid critical section solutions' },
       ],
     },
+    {
+      type: 'chart',
+      id: 'chart-os-sched',
+      title: 'Comparative Benchmark: Average Waiting Time (ms)',
+      chartType: 'comparison',
+      xAxisLabel: 'Standard 5-process benchmark test suite',
+      yAxisLabel: 'Average Waiting Time (ms)',
+      data: [
+        { label: 'Shortest Job First (SJF)', value: 14, unit: 'ms', description: 'Provably minimal waiting time with prior burst knowledge' },
+        { label: 'Round Robin (RR, q=20ms)', value: 28, unit: 'ms', description: 'Balanced time-sharing with low latency' },
+        { label: 'Priority Scheduling', value: 34, unit: 'ms', description: 'Priority-based dispatch with aging enabled' },
+        { label: 'First-Come, First-Served (FCFS)', value: 52, unit: 'ms', description: 'Highest latency due to convoy effect' },
+      ],
+      summary: 'Shortest Job First (SJF) achieves the lowest average waiting time (14ms), outperforming FCFS by 73% by preventing shorter tasks from queuing behind CPU-bound processes.',
+    },
   ],
 };
 
@@ -135,7 +150,7 @@ export const MOCK_SAVED_SESSION: StudySession = {
   title: MOCK_GENERATION_RESPONSE.title,
   topicOrNotes: SAMPLE_STUDY_MATERIAL,
   difficulty: 'intermediate',
-  selectedBlockTypes: ['summary', 'flashcards', 'quiz', 'checklist'],
+  selectedBlockTypes: ['summary', 'flashcards', 'quiz', 'checklist', 'chart'],
   createdAt: Date.now() - 3600000,
   updatedAt: Date.now() - 1800000,
   blocks: MOCK_GENERATION_RESPONSE.blocks,

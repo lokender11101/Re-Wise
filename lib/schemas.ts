@@ -7,7 +7,7 @@ import { z } from 'zod';
  */
 
 export const DifficultyLevelSchema = z.enum(['beginner', 'intermediate', 'advanced']);
-export const BlockTypeSchema = z.enum(['summary', 'flashcards', 'quiz', 'checklist']);
+export const BlockTypeSchema = z.enum(['summary', 'flashcards', 'quiz', 'checklist', 'chart']);
 
 // 1. Summary Block Schema
 export const SummaryBlockSchema = z.object({
@@ -68,12 +68,32 @@ export const ChecklistBlockSchema = z.object({
   items: z.array(ChecklistItemSchema).min(1, 'Checklist must contain at least one item').max(30),
 });
 
+// 5. Chart Data Point Schema & Block (Quantitative / Metric Comparison)
+export const ChartDataPointSchema = z.object({
+  label: z.string().min(1, 'Chart item label cannot be empty'),
+  value: z.number({ invalid_type_error: 'Chart item value must be a valid number' }),
+  unit: z.string().optional(),
+  description: z.string().optional(),
+});
+
+export const ChartBlockSchema = z.object({
+  type: z.literal('chart'),
+  id: z.string().min(1).default(() => `chart-${Math.random().toString(36).substring(2, 9)}`),
+  title: z.string().min(1, 'Chart title cannot be empty'),
+  chartType: z.enum(['bar', 'comparison', 'distribution']).default('bar'),
+  xAxisLabel: z.string().optional(),
+  yAxisLabel: z.string().optional(),
+  data: z.array(ChartDataPointSchema).min(1, 'Chart must contain at least one data point').max(20),
+  summary: z.string().min(1, 'Chart must provide an accessible text summary'),
+});
+
 // Discriminated Union for all block types
 export const StudyBlockSchema = z.discriminatedUnion('type', [
   SummaryBlockSchema,
   FlashcardBlockSchema,
   QuizBlockSchema,
   ChecklistBlockSchema,
+  ChartBlockSchema,
 ]);
 
 // Full AI Generation Structured Response Schema

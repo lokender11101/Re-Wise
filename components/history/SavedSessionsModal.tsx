@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { X, BookOpen, Trash2, Calendar, ArrowRight, Layers } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, BookOpen, Trash2, Calendar, ArrowRight, Layers, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { getSavedSessions, deleteSession } from '@/lib/storage';
+import { getSavedSessions, deleteSession, importSessionFromJSON } from '@/lib/storage';
 import { calculateOverallMastery } from '@/lib/studyLogic';
 import type { StudySession } from '@/types/study';
 
@@ -22,12 +22,26 @@ export const SavedSessionsModal: React.FC<SavedSessionsModalProps> = ({
   onSelectSession,
 }) => {
   const [sessions, setSessions] = useState<StudySession[]>([]);
+  const [importError, setImportError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isOpen) {
       setSessions(getSavedSessions());
+      setImportError(null);
     }
   }, [isOpen]);
+
+  // Accessible Escape key handler
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -35,6 +49,25 @@ export const SavedSessionsModal: React.FC<SavedSessionsModalProps> = ({
     e.stopPropagation();
     deleteSession(id);
     setSessions((prev) => prev.filter((s) => s.id !== id));
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const text = event.target?.result as string;
+        const imported = importSessionFromJSON(text);
+        setSessions(getSavedSessions());
+        onSelectSession(imported.id);
+        onClose();
+      } catch (err) {
+        setImportError(err instanceof Error ? err.message : 'Invalid ReWise session JSON format');
+      }
+    };
+    reader.readAsText(file);
   };
 
   return (
@@ -144,8 +177,32 @@ export const SavedSessionsModal: React.FC<SavedSessionsModalProps> = ({
           )}
         </div>
 
+        {/* Import Error Message */}
+        {importError && (
+          <div className="px-5 py-2.5 bg-[#1F1010] border-b border-[#3D1E1E] text-xs text-[#F87171]">
+            {importError}
+          </div>
+        )}
+
         {/* Modal Footer */}
-        <div className="p-4 border-t border-[#1F1F1F] flex justify-end bg-[#101010]">
+        <div className="p-4 border-t border-[#1F1F1F] flex items-center justify-between bg-[#101010]">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileUpload}
+            accept=".json,application/json"
+            className="hidden"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => fileInputRef.current?.click()}
+            leftIcon={<Upload className="w-3.5 h-3.5 text-[#737373]" />}
+          >
+            Import JSON
+          </Button>
+
           <Button variant="secondary" size="sm" onClick={onClose}>
             Close
           </Button>

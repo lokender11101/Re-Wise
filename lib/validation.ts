@@ -89,6 +89,11 @@ export function stabilizeBlockIds(blocks: StudyBlock[]): StudyBlock[] {
               : `item-${bIdx + 1}-${iIdx + 1}-${Date.now().toString(36)}`,
           })),
         };
+      case 'chart':
+        return {
+          ...block,
+          id: blockId,
+        };
       default:
         return block;
     }

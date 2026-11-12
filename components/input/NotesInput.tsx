@@ -10,6 +10,7 @@ import {
   ArrowRight,
   SlidersHorizontal,
   Flame,
+  BarChart3,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import type { DifficultyLevel, ContentBlockType } from '@/types/study';
@@ -47,7 +48,7 @@ export const NotesInput: React.FC<NotesInputProps> = ({ onGenerate, isLoading = 
   };
 
   const selectAllTypes = () => {
-    setSelectedTypes(['summary', 'flashcards', 'quiz', 'checklist']);
+    setSelectedTypes(['summary', 'flashcards', 'quiz', 'checklist', 'chart']);
   };
 
   const handleFillSample = () => {
@@ -84,6 +85,7 @@ export const NotesInput: React.FC<NotesInputProps> = ({ onGenerate, isLoading = 
     { id: 'flashcards', label: 'Flashcards', icon: <Layers className="w-3.5 h-3.5" /> },
     { id: 'quiz', label: 'Quiz', icon: <HelpCircle className="w-3.5 h-3.5" /> },
     { id: 'checklist', label: 'Checklist', icon: <CheckSquare className="w-3.5 h-3.5" /> },
+    { id: 'chart', label: 'Chart', icon: <BarChart3 className="w-3.5 h-3.5" /> },
   ];
 
   return (
@@ -192,7 +194,7 @@ export const NotesInput: React.FC<NotesInputProps> = ({ onGenerate, isLoading = 
               Select All
             </button>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
             {blockTypeOptions.map((opt) => {
               const isSelected = selectedTypes.includes(opt.id);
               return (

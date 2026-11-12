@@ -13,6 +13,7 @@ export function buildGenerationPrompt(
     flashcards: `- "flashcards" block: Provide 4 to 8 high-impact flashcards for active recall. Each card has "question", "answer", and "difficulty" ("easy" | "medium" | "hard").`,
     quiz: `- "quiz" block: Provide 3 to 6 multiple-choice questions testing conceptual comprehension and application. Each question must include "question", an array of 4 distinct "options", a zero-based integer "correctAnswerIndex" (between 0 and 3), and a clear "explanation" detailing why that option is correct.`,
     checklist: `- "checklist" block: Provide 4 to 8 actionable revision checklist items ("items" array with "text") for verifying subject mastery.`,
+    chart: `- "chart" block: When quantitative comparisons, relative metrics, or distribution data are present or applicable in the study material, provide a "chart" block with "title", "chartType" ("bar" | "comparison" | "distribution"), "data" array ({ "label": string, "value": number, "unit"?: string, "description"?: string }), and an accessible "summary". Do NOT fabricate arbitrary numbers.`,
   };
 
   const requestedBlocksDescription = selectedTypes
@@ -43,6 +44,8 @@ Available block schemas:
   { "type": "quiz", "id": "quiz-1", "questions": [{ "id": "q-1", "question": "...", "options": ["Choice A", "Choice B", "Choice C", "Choice D"], "correctAnswerIndex": 0, "explanation": "..." }] }
 - Checklist block:
   { "type": "checklist", "id": "checklist-1", "title": "Revision Checklist", "items": [{ "id": "item-1", "text": "..." }] }
+- Chart block:
+  { "type": "chart", "id": "chart-1", "title": "Quantitative Comparison", "chartType": "bar", "xAxisLabel": "...", "yAxisLabel": "...", "data": [{ "label": "Alg A", "value": 85, "unit": "ms", "description": "..." }], "summary": "..." }
 
 4. Requested block types for this generation:
 ${requestedBlocksDescription}

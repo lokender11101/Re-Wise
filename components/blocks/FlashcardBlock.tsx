@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import {
   Layers,
   ChevronLeft,
@@ -10,6 +11,7 @@ import {
   HelpCircle,
   Keyboard,
   Shuffle,
+  Sparkles,
 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -31,6 +33,17 @@ export const FlashcardBlock: React.FC<FlashcardBlockProps> = ({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [cards, setCards] = useState(block.cards);
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [isCoarsePointer, setIsCoarsePointer] = useState(false);
+  const cardContainerRef = useRef<HTMLDivElement>(null);
+
+  const shouldReduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsCoarsePointer(window.matchMedia('(pointer: coarse)').matches);
+    }
+  }, []);
 
   const currentCard = cards[currentIndex] || cards[0];
   const totalCards = cards.length;
@@ -69,6 +82,19 @@ export const FlashcardBlock: React.FC<FlashcardBlockProps> = ({
     setIsFlipped(false);
   };
 
+  // 3D Perspective Tilt on pointer move (disabled on touch devices or reduced motion)
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isCoarsePointer || shouldReduceMotion) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    setTilt({ x: -y * 8, y: x * 8 });
+  };
+
+  const handleMouseLeave = () => {
+    setTilt({ x: 0, y: 0 });
+  };
+
   // Keyboard navigation
   useKeyboardNav({
     onNext: handleNext,
@@ -95,10 +121,10 @@ export const FlashcardBlock: React.FC<FlashcardBlockProps> = ({
           </div>
           <div>
             <span className="text-[10px] font-semibold tracking-wider text-[#737373] uppercase">
-              Active Recall
+              Active Recall Engine
             </span>
             <h3 className="text-base md:text-lg font-semibold text-[#F5F5F5]">
-              Interactive Flashcards
+              Interactive 3D Flashcards
             </h3>
           </div>
         </div>
@@ -146,8 +172,12 @@ export const FlashcardBlock: React.FC<FlashcardBlockProps> = ({
         </div>
       </div>
 
-      {/* 3D Flip Card Container */}
+      {/* 3D Flip Card Scene */}
       <div
+        ref={cardContainerRef}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        className="relative w-full min-h-[260px] md:min-h-[300px] perspective-1200 cursor-pointer select-none"
         onClick={handleFlip}
         role="button"
         tabIndex={0}
@@ -157,49 +187,121 @@ export const FlashcardBlock: React.FC<FlashcardBlockProps> = ({
             handleFlip();
           }
         }}
-        aria-label={`Flashcard: ${isFlipped ? 'Answer' : 'Question'}. Click to flip.`}
-        className="relative w-full min-h-[250px] md:min-h-[290px] cursor-pointer select-none rounded-2xl p-6 md:p-8 flex flex-col justify-between transition-all duration-200 bg-[#0A0A0A] border border-[#252525] hover:border-[#444444] hover:bg-[#0D0D0D] group"
+        aria-label={`Flashcard ${currentIndex + 1}: ${isFlipped ? 'Answer' : 'Question'}. Click to flip.`}
       >
-        {/* Card Top Row */}
-        <div className="flex items-center justify-between text-xs">
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-[#525252] text-xs">Card #{currentIndex + 1}</span>
-            {currentCard?.difficulty && (
-              <Badge variant="neutral" size="sm">
-                {currentCard.difficulty}
-              </Badge>
-            )}
+        <motion.div
+          animate={{
+            rotateY: shouldReduceMotion ? 0 : isFlipped ? 180 : 0,
+            rotateX: shouldReduceMotion ? 0 : tilt.x,
+            rotateZ: shouldReduceMotion ? 0 : tilt.y * 0.15,
+            opacity: shouldReduceMotion ? 1 : 1,
+          }}
+          transition={{
+            duration: shouldReduceMotion ? 0.05 : 0.55,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+          className="relative w-full h-full min-h-[260px] md:min-h-[300px] transform-style-3d transition-shadow"
+          style={{
+            boxShadow: isFlipped
+              ? '0 16px 32px -8px rgba(0, 0, 0, 0.9), 0 0 0 1px #333333'
+              : '0 12px 24px -6px rgba(0, 0, 0, 0.8), 0 0 0 1px #222222',
+          }}
+        >
+          {/* Front Face: Question */}
+          <div
+            className={`absolute inset-0 backface-hidden rounded-2xl p-6 md:p-8 flex flex-col justify-between bg-[#0A0A0A] border border-[#252525] hover:border-[#383838] transition-colors ${
+              shouldReduceMotion && isFlipped ? 'hidden' : 'flex'
+            }`}
+          >
+            {/* Front Top Row */}
+            <div className="flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[#525252] text-xs">Card #{currentIndex + 1}</span>
+                {currentCard?.difficulty && (
+                  <Badge variant="neutral" size="sm">
+                    {currentCard.difficulty}
+                  </Badge>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2">
+                {cardStatus === 'known' && (
+                  <Badge variant="primary">
+                    <CheckCircle2 className="w-3 h-3 inline mr-1 text-white" /> Mastered
+                  </Badge>
+                )}
+                {cardStatus === 'learning' && (
+                  <Badge variant="neutral">
+                    <HelpCircle className="w-3 h-3 inline mr-1 text-[#A3A3A3]" /> Needs Review
+                  </Badge>
+                )}
+              </div>
+            </div>
+
+            {/* Front Question Body */}
+            <div className="my-auto py-6 text-center">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#141414] border border-[#252525] text-[10px] uppercase tracking-widest font-semibold mb-3 text-[#737373]">
+                Question
+              </div>
+              <p className="text-base md:text-xl font-medium text-[#F5F5F5] leading-relaxed max-w-2xl mx-auto">
+                {currentCard?.question}
+              </p>
+            </div>
+
+            {/* Front Bottom Hint */}
+            <div className="flex items-center justify-center gap-1.5 text-xs text-[#525252] hover:text-[#A3A3A3] transition-colors">
+              <RotateCw className="w-3.5 h-3.5" />
+              <span>Click or press Space to reveal answer</span>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            {cardStatus === 'known' && (
-              <Badge variant="primary">
-                <CheckCircle2 className="w-3 h-3 inline mr-1 text-white" /> Mastered
-              </Badge>
-            )}
-            {cardStatus === 'learning' && (
-              <Badge variant="neutral">
-                <HelpCircle className="w-3 h-3 inline mr-1 text-[#A3A3A3]" /> Needs Review
-              </Badge>
-            )}
-          </div>
-        </div>
+          {/* Back Face: Answer */}
+          <div
+            style={{ transform: shouldReduceMotion ? 'none' : 'rotateY(180deg)' }}
+            className={`absolute inset-0 backface-hidden rounded-2xl p-6 md:p-8 flex flex-col justify-between bg-[#0E0E0E] border border-[#333333] hover:border-[#444444] transition-colors ${
+              shouldReduceMotion && !isFlipped ? 'hidden' : 'flex'
+            }`}
+          >
+            {/* Back Top Row */}
+            <div className="flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[#737373] text-xs">Card #{currentIndex + 1}</span>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#1A1A1A] text-[#E5E5E5] border border-[#333333]">
+                  <Sparkles className="w-3 h-3 text-white" /> Solution
+                </span>
+              </div>
 
-        {/* Card Body (Question or Answer) */}
-        <div className="my-auto py-6 text-center">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#141414] border border-[#252525] text-[10px] uppercase tracking-widest font-semibold mb-3 text-[#737373]">
-            {isFlipped ? 'Answer' : 'Question'}
-          </div>
-          <p className="text-base md:text-xl font-medium text-[#F5F5F5] leading-relaxed max-w-2xl mx-auto">
-            {isFlipped ? currentCard?.answer : currentCard?.question}
-          </p>
-        </div>
+              <div className="flex items-center gap-2">
+                {cardStatus === 'known' && (
+                  <Badge variant="primary">
+                    <CheckCircle2 className="w-3 h-3 inline mr-1 text-white" /> Mastered
+                  </Badge>
+                )}
+                {cardStatus === 'learning' && (
+                  <Badge variant="neutral">
+                    <HelpCircle className="w-3 h-3 inline mr-1 text-[#A3A3A3]" /> Needs Review
+                  </Badge>
+                )}
+              </div>
+            </div>
 
-        {/* Card Bottom Hint */}
-        <div className="flex items-center justify-center gap-1.5 text-xs text-[#525252] group-hover:text-[#A3A3A3] transition-colors">
-          <RotateCw className="w-3.5 h-3.5" />
-          <span>Click or press Space to {isFlipped ? 'view question' : 'reveal answer'}</span>
-        </div>
+            {/* Back Answer Body */}
+            <div className="my-auto py-6 text-center">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#181818] border border-[#333333] text-[10px] uppercase tracking-widest font-semibold mb-3 text-white">
+                Answer & Key Takeaway
+              </div>
+              <p className="text-base md:text-xl font-normal text-[#FFFFFF] leading-relaxed max-w-2xl mx-auto">
+                {currentCard?.answer}
+              </p>
+            </div>
+
+            {/* Back Bottom Hint */}
+            <div className="flex items-center justify-center gap-1.5 text-xs text-[#737373] hover:text-[#A3A3A3] transition-colors">
+              <RotateCw className="w-3.5 h-3.5" />
+              <span>Click or press Space to flip back to question</span>
+            </div>
+          </div>
+        </motion.div>
       </div>
 
       {/* Navigation & Tagging Controls */}

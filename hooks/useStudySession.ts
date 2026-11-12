@@ -16,7 +16,7 @@ import {
   getActiveSessionId,
   setActiveSessionId,
 } from '@/lib/storage';
-import { calculateQuizScore } from '@/lib/studyLogic';
+import { calculateQuizScore, mergeRefinedBlocks } from '@/lib/studyLogic';
 
 export function useStudySession() {
   const [session, setSession] = useState<StudySession | null>(null);
@@ -91,14 +91,15 @@ export function useStudySession() {
     [syncSession]
   );
 
-  // Update blocks (e.g. after refinement)
+  // Update blocks with smart merging (preserves unchanged IDs & user progress)
   const updateBlocks = useCallback(
     (newBlocks: StudyBlock[], newTitle?: string) => {
       if (!session) return;
+      const merged = mergeRefinedBlocks(session.blocks, newBlocks);
       const updated: StudySession = {
         ...session,
         title: newTitle || session.title,
-        blocks: newBlocks,
+        blocks: merged,
         updatedAt: Date.now(),
       };
       syncSession(updated);

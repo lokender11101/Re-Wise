@@ -149,3 +149,12 @@ export function setActiveSessionId(sessionId: string | null): void {
     window.localStorage.removeItem(ACTIVE_SESSION_ID_KEY);
   }
 }
+
+/**
+ * Safely imports and validates a study session from a JSON string or object.
+ */
+export function importSessionFromJSON(rawJSON: string | unknown): StudySession {
+  const parsed = typeof rawJSON === 'string' ? JSON.parse(rawJSON) : rawJSON;
+  const validated = SavedSessionSchema.parse(parsed);
+  return saveSession(validated as StudySession);
+}

@@ -9,6 +9,7 @@ import { RetestSection } from '@/components/study/RetestSection';
 import { StudyProgress } from '@/components/study/StudyProgress';
 import { SessionOverview } from '@/components/study/SessionOverview';
 import { GenerationLoadingSkeleton } from '@/components/ui/Skeleton';
+import { StreamingProgressIndicator } from '@/components/ui/StreamingProgressIndicator';
 import { ErrorAlert } from '@/components/ui/ErrorAlert';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useStudySession } from '@/hooks/useStudySession';
@@ -43,7 +44,16 @@ export default function ReWiseDashboard() {
     clearSession,
   } = useStudySession();
 
-  const { isGenerating, isRefining, error, clearError, generate, refine } = useGeneration();
+  const {
+    isGenerating,
+    isRefining,
+    streamProgress,
+    error,
+    clearError,
+    generate,
+    refine,
+    abort,
+  } = useGeneration();
 
   // Handle generation submission
   const handleGenerate = async (payload: {
@@ -155,8 +165,13 @@ export default function ReWiseDashboard() {
           </div>
         )}
 
-        {/* Loading Skeleton */}
-        {isGenerating && <GenerationLoadingSkeleton />}
+        {/* Streaming Progress Indicator & Loading Skeleton */}
+        {isGenerating && (
+          <div className="space-y-6 animate-fade-in">
+            <StreamingProgressIndicator progress={streamProgress} onCancel={abort} />
+            <GenerationLoadingSkeleton />
+          </div>
+        )}
 
         {/* Active Session Content */}
         {session && !isGenerating && (

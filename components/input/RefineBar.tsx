@@ -13,10 +13,12 @@ export const RefineBar: React.FC<RefineBarProps> = ({ onRefine, isLoading = fals
   const [instruction, setInstruction] = useState('');
 
   const suggestedPrompts = [
-    'Make the quiz questions more challenging',
+    'Make quiz questions harder',
     'Add 4 more flashcards on edge cases',
-    'Simplify the summary with real-world analogies',
-    'Add application-based scenario questions',
+    'Add a quantitative comparison chart',
+    'Simplify summary with real-world analogies',
+    'Generate scenario-based application questions',
+    'Focus on concepts answered incorrectly',
   ];
 
   const handleSubmit = (e: React.FormEvent) => {
