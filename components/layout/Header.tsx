@@ -53,7 +53,7 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Right: Actions */}
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-2">
         <Button
           size="sm"
           variant="outline"
@@ -63,7 +63,7 @@ export const Header: React.FC<HeaderProps> = ({
         >
           <span>Sessions</span>
           {savedCount > 0 && (
-            <span className="ml-1 px-1.5 py-0.2 rounded-full bg-[#181818] text-[10px] font-mono text-[#A3A3A3] border border-[#252525]">
+            <span className="ml-1 px-1.5 py-0.5 rounded-full bg-[#181818] text-[10px] font-mono text-[#A3A3A3] border border-[#252525]">
               {savedCount}
             </span>
           )}
@@ -74,9 +74,10 @@ export const Header: React.FC<HeaderProps> = ({
           variant="primary"
           onClick={onNewSession}
           leftIcon={<Plus className="w-3.5 h-3.5" />}
-          className="text-xs hidden sm:inline-flex"
+          className="text-xs font-semibold"
         >
-          New Session
+          <span className="hidden sm:inline">New Session</span>
+          <span className="sm:hidden">New</span>
         </Button>
       </div>
     </header>

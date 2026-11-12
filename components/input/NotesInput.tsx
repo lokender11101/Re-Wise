@@ -89,17 +89,21 @@ export const NotesInput: React.FC<NotesInputProps> = ({ onGenerate, isLoading = 
   return (
     <form
       onSubmit={handleSubmit}
-      className="p-5 md:p-6 rounded-2xl bg-[#101010] border border-[#252525] space-y-5"
+      className="p-6 md:p-8 rounded-2xl bg-[#101010] border border-[#252525] space-y-6 shadow-xl"
     >
-      {/* Top row */}
+      {/* Top Header Row */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-lg bg-[#181818] border border-[#252525] text-[#F5F5F5]">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-[#181818] border border-[#252525] text-[#F5F5F5]">
             <Sparkles className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-sm md:text-base font-semibold text-[#F5F5F5]">Study Material & Topic</h3>
-            <p className="text-xs text-[#737373]">Paste lecture notes, articles, or a topic name</p>
+            <h3 className="text-base md:text-lg font-semibold text-[#F5F5F5]">
+              Study Material & Lecture Notes
+            </h3>
+            <p className="text-xs text-[#737373]">
+              Paste study material, lecture notes, or enter any topic to transform
+            </p>
           </div>
         </div>
 
@@ -114,20 +118,22 @@ export const NotesInput: React.FC<NotesInputProps> = ({ onGenerate, isLoading = 
       </div>
 
       {/* Main Textarea */}
-      <div className="relative">
-        <textarea
-          rows={5}
-          value={notes}
-          onChange={(e) => {
-            setNotes(e.target.value);
-            if (validationError) setValidationError(null);
-          }}
-          placeholder="Paste lecture notes, textbook passages, or enter a topic (e.g. 'Operating Systems: CPU Scheduling & Mutex Locks')..."
-          className="w-full rounded-xl bg-[#080808] border border-[#252525] p-4 text-sm text-[#F5F5F5] placeholder-[#525252] focus:outline-none focus:border-[#444444] focus:ring-1 focus:ring-[#444444] transition-all resize-y leading-relaxed"
-          maxLength={25000}
-        />
-        <div className="flex justify-between items-center px-1 text-[11px] text-[#737373] pt-1">
-          <span>{notes.length} / 25,000 characters</span>
+      <div className="space-y-1.5">
+        <div className="relative">
+          <textarea
+            rows={6}
+            value={notes}
+            onChange={(e) => {
+              setNotes(e.target.value);
+              if (validationError) setValidationError(null);
+            }}
+            placeholder="Paste lecture notes, textbook passages, or enter a topic (e.g. 'Operating Systems: CPU Scheduling & Mutex Locks', 'Cellular Respiration & Krebs Cycle')..."
+            className="w-full rounded-xl bg-[#070707] border border-[#252525] p-4 md:p-5 text-sm text-[#F5F5F5] placeholder-[#525252] focus:outline-none focus:border-[#444444] focus:ring-1 focus:ring-[#444444] transition-all resize-y leading-relaxed font-normal"
+            maxLength={25000}
+          />
+        </div>
+        <div className="flex justify-between items-center px-1 text-[11px] text-[#737373]">
+          <span>{notes.length.toLocaleString()} / 25,000 characters</span>
           {notes.length > 0 && (
             <button
               type="button"
@@ -140,11 +146,14 @@ export const NotesInput: React.FC<NotesInputProps> = ({ onGenerate, isLoading = 
         </div>
       </div>
 
+      {/* Divider */}
+      <div className="border-t border-[#1C1C1C] pt-1" />
+
       {/* Settings Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Difficulty Level Selector */}
-        <div className="space-y-2">
-          <label className="text-xs font-medium text-[#737373] flex items-center gap-1.5 uppercase tracking-wider">
+        <div className="space-y-2.5">
+          <label className="text-xs font-semibold text-[#737373] flex items-center gap-1.5 uppercase tracking-wider">
             <SlidersHorizontal className="w-3 h-3 text-[#737373]" />
             <span>Target Difficulty</span>
           </label>
@@ -156,7 +165,7 @@ export const NotesInput: React.FC<NotesInputProps> = ({ onGenerate, isLoading = 
                   key={level}
                   type="button"
                   onClick={() => setDifficulty(level)}
-                  className={`py-2 px-3 rounded-xl text-xs font-medium capitalize border transition-all text-center ${
+                  className={`py-2.5 px-3 rounded-xl text-xs font-medium capitalize border transition-all text-center ${
                     isSelected
                       ? 'bg-white border-white text-black font-semibold'
                       : 'bg-[#141414] border-[#252525] text-[#737373] hover:text-[#A3A3A3] hover:border-[#383838]'
@@ -170,9 +179,9 @@ export const NotesInput: React.FC<NotesInputProps> = ({ onGenerate, isLoading = 
         </div>
 
         {/* Content Block Selection */}
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           <div className="flex items-center justify-between">
-            <label className="text-xs font-medium text-[#737373] uppercase tracking-wider">
+            <label className="text-xs font-semibold text-[#737373] uppercase tracking-wider">
               Learning Blocks
             </label>
             <button
@@ -191,9 +200,9 @@ export const NotesInput: React.FC<NotesInputProps> = ({ onGenerate, isLoading = 
                   key={opt.id}
                   type="button"
                   onClick={() => toggleType(opt.id)}
-                  className={`py-2 px-2.5 rounded-xl text-xs font-medium border flex items-center justify-center gap-1.5 transition-all ${
+                  className={`py-2.5 px-2.5 rounded-xl text-xs font-medium border flex items-center justify-center gap-1.5 transition-all ${
                     isSelected
-                      ? 'bg-[#1E1E1E] border-[#444444] text-white font-medium'
+                      ? 'bg-[#202020] border-[#444444] text-white font-semibold'
                       : 'bg-[#141414] border-[#252525] text-[#737373] hover:text-[#A3A3A3]'
                   }`}
                 >
@@ -208,22 +217,22 @@ export const NotesInput: React.FC<NotesInputProps> = ({ onGenerate, isLoading = 
 
       {/* Validation alert */}
       {validationError && (
-        <p className="text-xs text-[#FCA5A5] bg-[#141010] border border-[#331F1F] p-2.5 rounded-lg">
+        <p className="text-xs text-[#F87171] bg-[#1E0F0F] border border-[#441C1C] p-3 rounded-xl">
           {validationError}
         </p>
       )}
 
       {/* Submit Action */}
-      <div className="flex justify-end pt-2 border-t border-[#1F1F1F]">
+      <div className="flex justify-end pt-3 border-t border-[#1F1F1F]">
         <Button
           type="submit"
           size="lg"
           variant="primary"
           isLoading={isLoading}
           rightIcon={<ArrowRight className="w-4 h-4" />}
-          className="w-full sm:w-auto font-semibold"
+          className="w-full sm:w-auto font-semibold px-6"
         >
-          Generate Active Learning Experience
+          Transform into Study Blocks
         </Button>
       </div>
     </form>

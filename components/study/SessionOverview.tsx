@@ -50,7 +50,7 @@ export const SessionOverview: React.FC<SessionOverviewProps> = ({
   });
 
   return (
-    <div className="p-5 md:p-6 rounded-2xl bg-[#101010] border border-[#252525] space-y-4">
+    <div className="p-6 md:p-8 rounded-2xl bg-[#101010] border border-[#252525] space-y-4">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         {/* Title & Metadata */}
         <div className="space-y-2 flex-1 min-w-0">
@@ -59,7 +59,7 @@ export const SessionOverview: React.FC<SessionOverviewProps> = ({
               {session.difficulty}
             </Badge>
 
-            <span className="flex items-center gap-1 text-xs text-[#737373]">
+            <span className="flex items-center gap-1.5 text-xs text-[#737373]">
               <Calendar className="w-3.5 h-3.5" />
               {formattedDate}
             </span>
@@ -73,20 +73,20 @@ export const SessionOverview: React.FC<SessionOverviewProps> = ({
                 value={editedTitle}
                 onChange={(e) => setEditedTitle(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSaveTitle()}
-                className="text-lg md:text-xl font-semibold bg-[#0A0A0A] border border-[#444444] rounded-lg px-3 py-1 text-white focus:outline-none w-full max-w-lg"
+                className="text-lg md:text-2xl font-bold tracking-tight bg-[#0A0A0A] border border-[#444444] rounded-xl px-3.5 py-1.5 text-white focus:outline-none w-full max-w-lg"
                 autoFocus
               />
               <button
                 type="button"
                 onClick={handleSaveTitle}
-                className="p-1.5 rounded-lg bg-white text-black hover:bg-[#E5E5E5]"
+                className="p-2 rounded-xl bg-white text-black hover:bg-[#E5E5E5] transition-colors"
               >
                 <Check className="w-4 h-4" />
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-2 group">
-              <h2 className="text-xl md:text-2xl font-semibold text-[#F5F5F5] truncate">
+            <div className="flex items-center gap-2.5 group">
+              <h2 className="text-xl md:text-2xl font-bold tracking-tight text-[#F5F5F5] truncate">
                 {session.title}
               </h2>
               <button
@@ -95,7 +95,7 @@ export const SessionOverview: React.FC<SessionOverviewProps> = ({
                   setEditedTitle(session.title);
                   setIsEditingTitle(true);
                 }}
-                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-[#737373] hover:text-[#F5F5F5]"
+                className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-[#181818] text-[#737373] hover:text-[#F5F5F5]"
                 title="Rename study session"
               >
                 <Edit2 className="w-3.5 h-3.5" />
@@ -105,7 +105,7 @@ export const SessionOverview: React.FC<SessionOverviewProps> = ({
         </div>
 
         {/* Action Controls */}
-        <div className="flex flex-wrap items-center gap-2 shrink-0">
+        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
           <Button
             size="sm"
             variant="outline"
@@ -113,7 +113,7 @@ export const SessionOverview: React.FC<SessionOverviewProps> = ({
             leftIcon={<Download className="w-3.5 h-3.5" />}
             title="Export session data as JSON"
           >
-            Export
+            Export JSON
           </Button>
 
           <Button
