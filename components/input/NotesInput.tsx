@@ -13,6 +13,7 @@ import {
   BarChart3,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { ReWiseMark } from '@/components/brand/ReWiseMark';
 import type { DifficultyLevel, ContentBlockType } from '@/types/study';
 import { SAMPLE_STUDY_MATERIAL } from '@/lib/mockData';
 
@@ -96,8 +97,8 @@ export const NotesInput: React.FC<NotesInputProps> = ({ onGenerate, isLoading = 
       {/* Top Header Row */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-[#181818] border border-[#252525] text-[#F5F5F5]">
-            <Sparkles className="w-4 h-4" />
+          <div className="p-1.5 rounded-xl bg-[#141414] border border-[#252525] flex items-center justify-center">
+            <ReWiseMark size={20} animated interactive />
           </div>
           <div>
             <h3 className="text-base md:text-lg font-semibold text-[#F5F5F5]">

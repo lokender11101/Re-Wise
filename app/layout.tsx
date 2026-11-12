@@ -5,6 +5,11 @@ export const metadata: Metadata = {
   title: 'ReWise — AI-Powered Active Learning Platform',
   description: 'Study smarter. Remember longer. Transforms study notes into interactive flashcards, quizzes, summaries, and revision checklists.',
   keywords: ['Active Learning', 'Flashcards', 'Quiz', 'AI Study Assistant', 'ReWise', 'DeepSeek'],
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({

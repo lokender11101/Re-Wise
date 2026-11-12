@@ -2,8 +2,9 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, Loader2, X, CheckCircle2, ShieldCheck, Database, Layers, HelpCircle, FileText } from 'lucide-react';
+import { X, CheckCircle2, ShieldCheck, Database, Layers, HelpCircle, FileText } from 'lucide-react';
 import { Button } from './Button';
+import { ReWiseMark } from '@/components/brand/ReWiseMark';
 import type { StreamProgressState, GenerationStage } from '@/hooks/useGeneration';
 
 export interface StreamingProgressIndicatorProps {
@@ -36,8 +37,8 @@ export const StreamingProgressIndicator: React.FC<StreamingProgressIndicatorProp
       {/* Header */}
       <div className="flex items-center justify-between border-b border-[#1F1F1F] pb-4">
         <div className="flex items-center gap-3">
-          <div className="relative p-2.5 rounded-xl bg-[#181818] border border-[#252525] text-white">
-            <Loader2 className="w-4 h-4 animate-spin" />
+          <div className="relative p-1.5 rounded-xl bg-[#141414] border border-[#252525] text-white flex items-center justify-center">
+            <ReWiseMark size={22} isLoading animated glow />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -69,7 +70,7 @@ export const StreamingProgressIndicator: React.FC<StreamingProgressIndicatorProp
       <div className="space-y-2">
         <div className="flex items-center justify-between text-xs">
           <span className="text-[#A3A3A3] font-medium flex items-center gap-2">
-            <Sparkles className="w-3.5 h-3.5 text-white animate-pulse" />
+            <ReWiseMark size={14} animated interactive={false} />
             {progress.stageMessage || 'Synthesizing learning modules...'}
           </span>
           <span className="text-[11px] font-mono text-[#737373]">

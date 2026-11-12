@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Sparkles, CornerDownLeft, Undo2 } from 'lucide-react';
+import { CornerDownLeft, Undo2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { ReWiseMark } from '@/components/brand/ReWiseMark';
 
 export interface RefineBarProps {
   onRefine: (instruction: string) => void;
@@ -46,8 +47,8 @@ export const RefineBar: React.FC<RefineBarProps> = ({
     <div className="p-6 md:p-8 rounded-2xl bg-[#101010] border border-[#252525] space-y-5">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-[#181818] border border-[#252525] text-[#F5F5F5]">
-            <Sparkles className="w-4 h-4" />
+          <div className="p-1.5 rounded-xl bg-[#141414] border border-[#252525] flex items-center justify-center">
+            <ReWiseMark size={20} animated={isLoading} isLoading={isLoading} />
           </div>
           <div>
             <h3 className="text-base font-semibold text-[#F5F5F5]">

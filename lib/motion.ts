@@ -123,3 +123,55 @@ export const modalDialogVariants: Variants = {
     transition: { duration: 0.15 },
   },
 };
+
+/**
+ * ReWise Brand & Logo Animation Variants
+ * Dedicated, GPU-accelerated motion profiles for the 3D Monogram & Wordmark.
+ */
+export const logoEntranceVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    scale: 0.92,
+    rotateX: 15,
+  },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    rotateX: 0,
+    transition: {
+      duration: 0.45,
+      ease: [0.16, 1, 0.3, 1],
+    },
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.95,
+    transition: { duration: 0.2 },
+  },
+};
+
+export const logoHoverVariants: Variants = {
+  rest: {
+    scale: 1,
+    transition: springTransition,
+  },
+  hover: {
+    scale: 1.05,
+    transition: springTransition,
+  },
+  tap: {
+    scale: 0.96,
+    transition: { duration: 0.1 },
+  },
+};
+
+export const logoLoadingVariants: Variants = {
+  animate: {
+    y: [0, -4, 0],
+    transition: {
+      duration: 2.2,
+      repeat: Infinity,
+      ease: 'easeInOut',
+    },
+  },
+};

@@ -1,8 +1,9 @@
 'use client';
 
 import React from 'react';
-import { BookOpen, Sparkles, CheckCircle2, RotateCw, Lightbulb, Play } from 'lucide-react';
+import { BookOpen, CheckCircle2, RotateCw, Lightbulb, Play } from 'lucide-react';
 import { Button } from './Button';
+import { ReWiseMark } from '@/components/brand/ReWiseMark';
 
 export interface EmptyStateProps {
   onSelectSampleTopic: (topic: string) => void;
@@ -30,10 +31,14 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 
   return (
     <div className="py-8 px-4 max-w-4xl mx-auto text-center space-y-8 animate-fade-in">
-      {/* Hero Badge */}
-      <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#141414] border border-[#252525] text-[#A3A3A3] text-xs font-medium">
-        <Sparkles className="w-3.5 h-3.5 text-[#F5F5F5]" />
-        <span>Active Recall & Pedagogical Retention</span>
+      {/* 3D Brand Emblem & Hero Badge */}
+      <div className="flex flex-col items-center justify-center gap-4">
+        <div className="p-3.5 rounded-3xl bg-[#0F0F0F] border border-[#252525] shadow-2xl">
+          <ReWiseMark size={64} glow interactive animated />
+        </div>
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#141414] border border-[#252525] text-[#A3A3A3] text-xs font-medium">
+          <span>Active Recall & Pedagogical Retention</span>
+        </div>
       </div>
 
       {/* Main Title */}

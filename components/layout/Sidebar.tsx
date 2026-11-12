@@ -2,7 +2,6 @@
 
 import React from 'react';
 import {
-  Sparkles,
   Plus,
   BookOpen,
   Trash2,
@@ -10,6 +9,7 @@ import {
   X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { ReWiseLogo } from '@/components/brand/ReWiseLogo';
 import type { StudySession } from '@/types/study';
 import { calculateOverallMastery } from '@/lib/studyLogic';
 
@@ -48,21 +48,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        {/* Top Header */}
+        {/* Top Header — ReWise Signature 3D Brand */}
         <div className="p-4 border-b border-[#1F1F1F] flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-[#141414] border border-[#252525] flex items-center justify-center text-white">
-              <Sparkles className="w-3.5 h-3.5" />
-            </div>
-            <div>
-              <span className="font-semibold text-sm tracking-tight text-[#F5F5F5] block">
-                ReWise
-              </span>
-              <span className="text-[10px] text-[#737373] block -mt-0.5">
-                Active Learning Engine
-              </span>
-            </div>
-          </div>
+          <ReWiseLogo
+            variant="compact"
+            size="sm"
+            subtitle="Active Learning Engine"
+            onClick={onNewSession}
+          />
 
           <button
             type="button"

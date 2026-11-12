@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <rect width="32" height="32" rx="7" fill="#050505"/>
+  <rect width="32" height="32" rx="7" fill="none" stroke="#252525" stroke-width="1"/>
+  <defs>
+    <linearGradient id="fav-spine" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="60%" stop-color="#D4D4D4"/>
+      <stop offset="100%" stop-color="#8C8C8C"/>
+    </linearGradient>
+    <linearGradient id="fav-loop" x1="0%" y1="0%" x2="100%" y2="80%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="50%" stop-color="#F5F5F5"/>
+      <stop offset="100%" stop-color="#A3A3A3"/>
+    </linearGradient>
+    <linearGradient id="fav-leg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="50%" stop-color="#D4D4D4"/>
+      <stop offset="100%" stop-color="#666666"/>
+    </linearGradient>
+    <linearGradient id="fav-depth" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#404040"/>
+      <stop offset="100%" stop-color="#141414"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Left Depth Extrusion (scale 0.28, centered) -->
+  <g transform="translate(2, 2) scale(0.28)">
+    <path d="M 17 23 L 26 15 L 26 83 L 17 76 Z" fill="url(#fav-depth)"/>
+    <path d="M 26 15 L 41 15 L 41 85 L 26 85 Z" fill="url(#fav-spine)"/>
+    <path d="M 17 23 L 26 15 L 41 15 L 34 23 Z" fill="#FFFFFF"/>
+    
+    <!-- Cast shadow onto spine -->
+    <path d="M 41 40 L 41 55 L 35 52 L 35 42 Z" fill="#000000" fill-opacity="0.5"/>
+    <path d="M 41 54 L 41 72 L 34 68 L 34 50 Z" fill="#000000" fill-opacity="0.55"/>
+
+    <!-- Upper Loop -->
+    <path d="M 41 15 L 63 15 C 76 15 84 24 84 36 C 84 48 74 55 60 55 L 41 55 Z M 41 27 L 58 27 C 65 27 69 30 69 35 C 69 40 65 43 58 43 L 41 43 Z" 
+          fill="url(#fav-loop)" 
+          fill-rule="evenodd"/>
+    <path d="M 41 15 L 63 15 C 76 15 84 24 84 36 L 80 36 C 80 26 73 18 63 18 L 41 18 Z" fill="#FFFFFF"/>
+
+    <!-- Diagonal Kick -->
+    <path d="M 45 47 L 59 47 L 83 85 L 68 85 Z" fill="url(#fav-leg)"/>
+    <path d="M 45 47 L 59 47 L 61 45 L 47 45 Z" fill="#FFFFFF"/>
+    <path d="M 68 85 L 83 85 L 77 89 L 62 89 Z" fill="url(#fav-depth)"/>
+  </g>
+</svg>

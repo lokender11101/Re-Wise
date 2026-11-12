@@ -12,6 +12,7 @@ import { GenerationLoadingSkeleton } from '@/components/ui/Skeleton';
 import { StreamingProgressIndicator } from '@/components/ui/StreamingProgressIndicator';
 import { ErrorAlert } from '@/components/ui/ErrorAlert';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { LogoLoader } from '@/components/brand/LogoLoader';
 import { useStudySession } from '@/hooks/useStudySession';
 import { useGeneration } from '@/hooks/useGeneration';
 import { MOCK_SAVED_SESSION, SAMPLE_STUDY_MATERIAL } from '@/lib/mockData';
@@ -256,13 +257,22 @@ export default function ReWiseDashboard() {
 
                 {/* Refinement Loop Bar */}
                 {!isRetesting && (
-                  <RefineBar
-                    onRefine={handleRefine}
-                    isLoading={isRefining}
-                    onUndo={undoRefinement}
-                    canUndo={canUndoRefinement}
-                    undoCount={undoSnapshotCount}
-                  />
+                  <div className="space-y-4">
+                    {isRefining && (
+                      <LogoLoader
+                        message="Refining your study material..."
+                        submessage="DeepSeek is adapting content to your instructions while preserving your learning progress"
+                        size="sm"
+                      />
+                    )}
+                    <RefineBar
+                      onRefine={handleRefine}
+                      isLoading={isRefining}
+                      onUndo={undoRefinement}
+                      canUndo={canUndoRefinement}
+                      undoCount={undoSnapshotCount}
+                    />
+                  </div>
                 )}
               </motion.div>
             </AnimatePresence>

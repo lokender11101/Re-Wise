@@ -1,8 +1,9 @@
 'use client';
 
 import React from 'react';
-import { Sparkles, Menu, Plus, History } from 'lucide-react';
+import { Menu, Plus, History } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { ReWiseLogo } from '@/components/brand/ReWiseLogo';
 
 export interface HeaderProps {
   onOpenSavedSessions: () => void;
@@ -18,8 +19,8 @@ export const Header: React.FC<HeaderProps> = ({
   savedCount = 0,
 }) => {
   return (
-    <header className="sticky top-0 z-30 w-full bg-[#050505]/90 backdrop-blur-md border-b border-[#1F1F1F] px-4 md:px-8 py-3.5 flex items-center justify-between">
-      {/* Left: Mobile hamburger & Logo */}
+    <header className="sticky top-0 z-30 w-full bg-[#050505]/90 backdrop-blur-md border-b border-[#1F1F1F] px-4 md:px-8 py-3 flex items-center justify-between">
+      {/* Left: Mobile hamburger & ReWise 3D Brand Logo */}
       <div className="flex items-center gap-3">
         {onToggleSidebar && (
           <button
@@ -32,24 +33,14 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
         )}
 
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-[#141414] border border-[#252525] flex items-center justify-center text-white">
-            <Sparkles className="w-3.5 h-3.5" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-sm md:text-base tracking-tight text-[#F5F5F5]">
-                ReWise
-              </span>
-              <span className="hidden sm:inline-block text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#141414] text-[#A3A3A3] border border-[#252525]">
-                Active Learning
-              </span>
-            </div>
-            <p className="hidden md:block text-[11px] text-[#737373] -mt-0.5">
-              Study smarter. Remember longer.
-            </p>
-          </div>
-        </div>
+        <ReWiseLogo
+          variant="horizontal"
+          size="sm"
+          showBadge={true}
+          badgeText="Active Learning"
+          subtitle="Study smarter. Remember longer."
+          onClick={onNewSession}
+        />
       </div>
 
       {/* Right: Actions */}
