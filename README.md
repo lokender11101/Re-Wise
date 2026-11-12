@@ -5,7 +5,7 @@
 
 ReWise transforms unstructured lecture notes, educational articles, and textbook excerpts into structured, highly interactive active-learning blocks: **Conceptual Summaries**, **3D Flip Flashcards**, **Multiple-Choice Quizzes**, **Revision Checklists**, and **Quantitative Comparison Charts** with dedicated **Wrong-Answer Retesting**, **SSE Progressive Streaming**, **Bounded Undo Refinement**, and an authentic **Concept-Level Learning Intelligence Engine**.
 
-Powered by **DeepSeek API** (`deepseek-flash`) using the official **OpenAI JavaScript SDK** with strict JSON Schema output mode and client-side Zod validation.
+Powered by **DeepSeek API** (`deepseek-flash`) using the official **OpenAI JavaScript SDK** with JSON object mode (`response_format: { type: "json_object" }`), server-side Zod schema validation for synchronous endpoints, and client-side Zod validation for buffered streaming responses before session state updates.
 
 ---
 
@@ -28,7 +28,7 @@ Powered by **DeepSeek API** (`deepseek-flash`) using the official **OpenAI JavaS
   - Flushes `TextDecoder` and processes trailing buffered events on stream termination.
   - Defensively rejects malformed JSON payloads and untyped events.
   - Propagates client cancellation upstream via `AbortController`.
-- **Safe Progressive Validation Boundary**: Solves the core challenge of streaming structured JSON. Rather than rendering unstable partial JSON that could break UI invariants, ReWise buffers incoming tokens while driving an interactive **6-stage visual progress tracker** (`Analyzing`, `Structuring`, `Flashcards`, `Quiz`, `Validating`, `Finalizing`), validating with Zod only upon completion.
+- **Safe Progressive Validation Boundary**: Solves the core challenge of streaming structured JSON. DeepSeek's `response_format: { type: "json_object" }` guarantees syntactically valid JSON syntax from the provider, but does not guarantee schema conformity or application domain rules. Zod performs application-level structural and semantic validation. Rather than rendering unstable partial JSON that could break UI invariants, ReWise buffers incoming tokens while driving an interactive **6-stage visual progress tracker** (`Analyzing`, `Structuring`, `Flashcards`, `Quiz`, `Validating`, `Finalizing`), performing comprehensive client-side Zod validation (`validateGenerationResponse`) only after the stream fully completes before updating session state. In synchronous mode (`/api/generate` and `/api/refine`), strict Zod validation is performed server-side before returning the HTTP payload.
 
 ### 4. Multiple Content Blocks & Quantitative Chart Block
 - **Polymorphic Architecture**: Discriminated union supporting `summary`, `flashcards`, `quiz`, `checklist`, and `chart`.
@@ -56,15 +56,17 @@ Powered by **DeepSeek API** (`deepseek-flash`) using the official **OpenAI JavaS
 - **Isolated Workspace Protection**: Wraps the interactive dashboard in a resilient `<ErrorBoundary>` component (`components/ui/ErrorBoundary.tsx`).
 - **Sanitized User Messaging**: Displays a clean monochromatic failure card with a "Reset Workspace & Retry" recovery action, guarding against unhandled runtime crashes without leaking sensitive server stack traces or internal exception details.
 
-### 9. Keyboard Accessibility Matrix
-- **Flashcards**:
+### 9. Keyboard Accessibility & Scoped Shortcuts
+- **Flashcards (Scoped to Active Flashcard Block)**:
+  - Shortcuts only operate while the flashcard interaction is active (the flashcard container has focus), preventing collisions with other page elements.
   - <kbd>Space</kbd> or <kbd>Enter</kbd>: Flip active flashcard (operates cleanly once per keypress).
   - <kbd>→</kbd> or <kbd>J</kbd>: Next card.
   - <kbd>←</kbd> or <kbd>K</kbd>: Previous card.
   - <kbd>1</kbd> or <kbd>M</kbd>: Mark as Mastered.
   - <kbd>2</kbd> or <kbd>R</kbd>: Mark as Needs Review.
-- **Quiz**:
-  - <kbd>1</kbd> – <kbd>6</kbd>: Select option index (automatically guarded against active text inputs).
+- **Quiz (Scoped & Event-Isolated)**:
+  - <kbd>1</kbd> – <kbd>6</kbd>: Select option index on focused question.
+  - Event propagation is stopped (`stopPropagation()`), completely preventing numeric quiz choices from accidentally triggering flashcard mastery status.
 - **Modals**:
   - <kbd>Escape</kbd>: Close active modal dialog.
 
@@ -151,15 +153,17 @@ rewise/
 │   └── validation.ts               # JSON cleaner, codeblock stripper, ID stabilizer
 ├── tests/
 │   ├── chart.test.ts               # Chart block schema & bounds verification
+│   ├── deepseek-errors.test.ts     # DeepSeek error classification & status code mapping
 │   ├── deepseek-integration.test.ts# Live DeepSeek API generation & refinement tests
 │   ├── error-boundary.test.tsx     # Defensive React ErrorBoundary tests
 │   ├── learning-analytics.test.ts  # Concept accuracy & attempt improvement tests
 │   ├── refinement-merge.test.ts    # Smart entity ID preservation test suite
 │   ├── retest.test.ts              # Scoring, wrong-answer retesting & allAnswered validation
 │   ├── schemas.test.ts             # Schema validation, bad AI output & edge cases
-│   ├── sseParser.test.ts           # Hardened SSE parser tests (LF, CRLF, split chunks)
+│   ├── sse-parser.test.ts          # Hardened SSE parser tests (LF, CRLF, split chunks)
 │   ├── storage-versioning.test.ts  # Versioned envelope & v1 migration tests
 │   ├── storage.test.ts             # Storage operations & corruption resilience tests
+│   ├── streaming-reliability.test.ts # Client cancellation, interrupted streams, error payloads
 │   └── undo-refinement.test.ts     # Bounded undo refinement & snapshot tests
 ├── .env.example
 ├── package.json
@@ -181,7 +185,7 @@ rewise/
 - **Validation**: Zod (Discriminated unions, custom range refinements, envelope validation)
 - **Icons**: Lucide React
 - **Celebrations**: `canvas-confetti`
-- **Testing**: Vitest + JSDOM (64 deterministic unit tests across 12 test suites + 2 live integration tests)
+- **Testing**: Vitest + JSDOM (67 deterministic unit tests across 12 test suites + 3 live integration tests)
 
 ---
 
@@ -247,7 +251,7 @@ npm test
 npm run test:unit
 ```
 
-Runs **64 tests across 12 test suites in ~1.8 seconds** with zero external network calls:
+Runs **67 tests across 12 test suites in ~1.5 seconds** with zero external network calls:
 - **`tests/chart.test.ts`**: Chart block schemas, non-empty data points, and bounds.
 - **`tests/sse-parser.test.ts`**: LF/CRLF frames, incomplete network chunk buffering, trailing flushes, malformed JSON rejection, and error event handling.
 - **`tests/streaming-reliability.test.ts`**: Client cancellation via `abort()`, interrupted streams, empty payloads, and HTTP error responses.
@@ -267,7 +271,7 @@ Runs **64 tests across 12 test suites in ~1.8 seconds** with zero external netwo
 npm run test:integration
 ```
 
-Connects directly to the live DeepSeek API (`api.deepseek.com`) to verify end-to-end generation and refinement payloads using the official OpenAI SDK.
+Connects directly to the live DeepSeek API (`api.deepseek.com`) to verify end-to-end generation and refinement payloads using the official OpenAI SDK (3 live tests).
 
 ### 3. Complete Test Runner
 
@@ -275,7 +279,7 @@ Connects directly to the live DeepSeek API (`api.deepseek.com`) to verify end-to
 npm run test:all
 ```
 
-Runs all 66 tests (both deterministic unit suites and live DeepSeek integration suites).
+Runs all 70 tests (67 deterministic unit suites + 3 live DeepSeek integration suites).
 
 ---
 
@@ -309,7 +313,7 @@ Runs all 66 tests (both deterministic unit suites and live DeepSeek integration 
 | Failure Scenario | Mitigation & Implementation |
 | :--- | :--- |
 | **Malformed JSON Output** | `extractAndParseJSON` extracts outermost `{ ... }` boundaries and strips markdown fences before parsing. |
-| **Invalid Schema / Missing Fields** | **Zod Schema Validation vs. JSON Mode**: DeepSeek's `response_format: { type: "json_object" }` guarantees only syntactically valid JSON, not domain conformity. Zod schemas (`schemas.ts`) strictly enforce all structural invariants, array lengths, and discriminated union shapes before data enters React state. |
+| **Invalid Schema / Missing Fields** | **Zod Schema Validation vs. JSON Mode**: DeepSeek's `response_format: { type: "json_object" }` guarantees syntactically valid JSON syntax from the provider, not domain conformity. Zod schemas (`schemas.ts`) perform application-level structural and semantic validation, strictly enforcing all domain invariants, array lengths, and discriminated union shapes. For synchronous endpoints (`/api/generate` and `/api/refine`), Zod validates server-side before returning HTTP responses. For streaming (`/api/generate/stream`), client-side validation buffers the complete payload and validates against Zod before updating session state. |
 | **Out-of-Bounds Quiz Answer Index** | `.refine(q => q.correctAnswerIndex >= 0 && q.correctAnswerIndex < q.options.length)` ensures quiz questions never reference non-existent options. |
 | **Stale Quiz Answer IDs** | `calculateQuizScore` checks `questions.every(q => answers[q.id] !== undefined)`, preventing stale keys from validating incomplete quizzes after refinement. |
 | **Streaming Chunk Failures** | `SSEFrameParser` supports LF/CRLF, buffers across chunks, flushes at EOF, and rejects malformed frames. Partial JSON is never committed to state until validated. |
@@ -340,7 +344,7 @@ Runs all 66 tests (both deterministic unit suites and live DeepSeek integration 
   - **Hardened SSE Streaming & Progressive Validation**: ~3 hours (Multi-delimiter frame parser, stream buffering, validation boundaries).
   - **Concept-Level Learning Intelligence & Retesting**: ~2.5 hours (Granular outcome tracking, concept accuracy aggregation, wrong-answer retesting).
   - **Bounded Undo Refinement & Storage Versioning**: ~2 hours (Snapshot state management, envelope migration, future schema protection).
-  - **Automated Testing Suite & Documentation**: ~2 hours (64 deterministic unit tests across 12 suites, live DeepSeek integration suite, README and architecture diagrams).
+  - **Automated Testing Suite & Documentation**: ~2 hours (67 deterministic unit tests across 12 suites, 3 live DeepSeek integration tests, README and architecture diagrams).
 
 ---
 
@@ -359,12 +363,10 @@ In compliance with the assignment instructions:
 
 ## 🎥 Video Demo Walkthrough
 
-A complete end-to-end video demonstration of ReWise — showcasing note ingestion, live SSE streaming, 3D card flips, quiz retesting, comparison charts, learning analytics, and undo refinement:
-
-👉 **[Watch Video Walkthrough (Loom / YouTube Demo)](https://youtu.be/demo-rewise-placeholder)**
+A complete video walkthrough demonstrating note ingestion, live SSE streaming, 3D card flips, quiz retesting, comparison charts, learning analytics, and undo refinement will be linked here once recorded.
 
 ---
 
 ## 📄 License
 
-MIT License. Copyright (c) 2026 Lokender Rao. See [LICENSE](file:///Users/lokenderrao/Developer/Re-Wise/LICENSE) for details.
+MIT License. Copyright (c) 2026 Lokender Rao. See [LICENSE](./LICENSE) for details.

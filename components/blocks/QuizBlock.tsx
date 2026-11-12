@@ -179,6 +179,7 @@ export const QuizBlock: React.FC<QuizBlockProps> = ({
                 const num = parseInt(e.key, 10);
                 if (!isNaN(num) && num >= 1 && num <= q.options.length) {
                   e.preventDefault();
+                  e.stopPropagation();
                   onRecordAnswer?.(q.id, num - 1);
                 }
               }}

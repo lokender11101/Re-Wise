@@ -36,6 +36,7 @@ export const FlashcardBlock: React.FC<FlashcardBlockProps> = ({
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [isCoarsePointer, setIsCoarsePointer] = useState(false);
   const cardContainerRef = useRef<HTMLDivElement>(null);
+  const blockRef = useRef<HTMLDivElement>(null);
 
   const shouldReduceMotion = useReducedMotion();
 
@@ -105,7 +106,7 @@ export const FlashcardBlock: React.FC<FlashcardBlockProps> = ({
     setTilt({ x: 0, y: 0 });
   };
 
-  // Keyboard navigation
+  // Scoped keyboard navigation — only active when user interacts with this flashcard block
   useKeyboardNav({
     onNext: handleNext,
     onPrev: handlePrev,
@@ -113,6 +114,7 @@ export const FlashcardBlock: React.FC<FlashcardBlockProps> = ({
     onMarkKnown: handleMarkKnown,
     onMarkReview: handleMarkReview,
     enabled: true,
+    containerRef: blockRef,
   });
 
   const cardStatus = currentCard ? progressMap[currentCard.id] : undefined;
@@ -122,7 +124,11 @@ export const FlashcardBlock: React.FC<FlashcardBlockProps> = ({
   const learningCount = cards.filter((c) => progressMap[c.id] === 'learning').length;
 
   return (
-    <Card className="space-y-6 animate-fade-in border-[#252525] bg-[#101010] p-6 md:p-8">
+    <Card
+      ref={blockRef}
+      tabIndex={0}
+      className="space-y-6 animate-fade-in border-[#252525] bg-[#101010] p-6 md:p-8 outline-none focus-within:border-[#383838]"
+    >
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#1F1F1F] pb-4">
         <div className="flex items-center gap-3">

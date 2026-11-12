@@ -137,6 +137,7 @@ export const RetestSection: React.FC<RetestSectionProps> = ({
                 const num = parseInt(e.key, 10);
                 if (!isNaN(num) && num >= 1 && num <= q.options.length) {
                   e.preventDefault();
+                  e.stopPropagation();
                   onRecordRetestAnswer(q.id, num - 1);
                 }
               }}
