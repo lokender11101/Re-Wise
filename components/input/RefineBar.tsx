@@ -1,15 +1,24 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Sparkles, CornerDownLeft } from 'lucide-react';
+import { Sparkles, CornerDownLeft, Undo2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 export interface RefineBarProps {
   onRefine: (instruction: string) => void;
   isLoading?: boolean;
+  onUndo?: () => void;
+  canUndo?: boolean;
+  undoCount?: number;
 }
 
-export const RefineBar: React.FC<RefineBarProps> = ({ onRefine, isLoading = false }) => {
+export const RefineBar: React.FC<RefineBarProps> = ({
+  onRefine,
+  isLoading = false,
+  onUndo,
+  canUndo = false,
+  undoCount = 0,
+}) => {
   const [instruction, setInstruction] = useState('');
 
   const suggestedPrompts = [
@@ -35,18 +44,35 @@ export const RefineBar: React.FC<RefineBarProps> = ({ onRefine, isLoading = fals
 
   return (
     <div className="p-6 md:p-8 rounded-2xl bg-[#101010] border border-[#252525] space-y-5">
-      <div className="flex items-center gap-3">
-        <div className="p-2.5 rounded-xl bg-[#181818] border border-[#252525] text-[#F5F5F5]">
-          <Sparkles className="w-4 h-4" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-[#181818] border border-[#252525] text-[#F5F5F5]">
+            <Sparkles className="w-4 h-4" />
+          </div>
+          <div>
+            <h3 className="text-base font-semibold text-[#F5F5F5]">
+              AI Content Refinement Loop
+            </h3>
+            <p className="text-xs text-[#737373]">
+              Iterate and adapt this session with follow-up instructions without starting over
+            </p>
+          </div>
         </div>
-        <div>
-          <h3 className="text-base font-semibold text-[#F5F5F5]">
-            AI Content Refinement Loop
-          </h3>
-          <p className="text-xs text-[#737373]">
-            Iterate and adapt this session with follow-up instructions without starting over
-          </p>
-        </div>
+
+        {canUndo && onUndo && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onUndo}
+            disabled={isLoading}
+            leftIcon={<Undo2 className="w-3.5 h-3.5 text-[#A3A3A3]" />}
+            className="shrink-0 text-xs text-[#F5F5F5] border-[#333333] hover:border-white bg-[#141414] hover:bg-[#1D1D1D]"
+            title="Revert to pre-refinement snapshot"
+          >
+            Undo Refinement {undoCount > 0 ? `(${undoCount})` : ''}
+          </Button>
+        )}
       </div>
 
       {/* Suggested chips */}

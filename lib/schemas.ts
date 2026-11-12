@@ -24,6 +24,7 @@ export const FlashcardSchema = z.object({
   question: z.string().min(1, 'Card question cannot be empty'),
   answer: z.string().min(1, 'Card answer cannot be empty'),
   difficulty: z.enum(['easy', 'medium', 'hard']).optional(),
+  conceptTag: z.string().optional(),
 });
 
 export const FlashcardBlockSchema = z.object({
@@ -40,6 +41,7 @@ export const QuizQuestionSchema = z
     options: z.array(z.string().min(1, 'Quiz option cannot be empty')).min(2, 'Must have at least 2 options').max(6),
     correctAnswerIndex: z.number().int().min(0),
     explanation: z.string().min(1, 'Question explanation cannot be empty'),
+    conceptTag: z.string().optional(),
   })
   .refine(
     (data) => data.correctAnswerIndex >= 0 && data.correctAnswerIndex < data.options.length,
@@ -127,8 +129,56 @@ export const RefineRequestSchema = z.object({
     .max(1000, 'Refinement instruction is too long (max 1000 characters)'),
 });
 
-// Saved Session Schema for local storage validation
+// Per-question Outcome Schema for learning analytics
+export const QuestionOutcomeSchema = z.object({
+  selected: z.number(),
+  correct: z.number(),
+  isCorrect: z.boolean(),
+  conceptTag: z.string().optional(),
+});
+
+// Quiz Attempt Record Schema
+export const QuizAttemptRecordSchema = z.object({
+  timestamp: z.number(),
+  score: z.number(),
+  total: z.number(),
+  mode: z.enum(['full', 'retest']),
+  answers: z.record(z.number()).optional(),
+  questionOutcomes: z.record(QuestionOutcomeSchema).optional(),
+});
+
+// Full Session Progress Schema
+export const SessionProgressSchema = z.object({
+  flashcards: z.record(z.enum(['known', 'learning'])).default({}),
+  quiz: z
+    .object({
+      answers: z.record(z.number()).default({}),
+      submitted: z.boolean().default(false),
+      score: z.number().optional(),
+      total: z.number().optional(),
+      incorrectQuestionIds: z.array(z.string()).optional(),
+      attempts: z.number().optional(),
+      history: z.array(QuizAttemptRecordSchema).optional(),
+    })
+    .default({ answers: {}, submitted: false }),
+  checklist: z.record(z.boolean()).default({}),
+});
+
+// Snapshot Schema for Undo Refinement (captures blocks, title, and full progress)
+export const SessionSnapshotSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1),
+  blocks: z.array(StudyBlockSchema),
+  progress: SessionProgressSchema,
+  timestamp: z.number(),
+  description: z.string().optional(),
+});
+
+// Saved Session Schema for local storage validation and versioning
+export const CURRENT_SCHEMA_VERSION = 2;
+
 export const SavedSessionSchema = z.object({
+  schemaVersion: z.number().int().default(CURRENT_SCHEMA_VERSION),
   id: z.string().min(1),
   title: z.string().min(1),
   topicOrNotes: z.string(),
@@ -137,28 +187,14 @@ export const SavedSessionSchema = z.object({
   createdAt: z.number(),
   updatedAt: z.number(),
   blocks: z.array(StudyBlockSchema),
-  progress: z.object({
-    flashcards: z.record(z.enum(['known', 'learning'])).default({}),
-    quiz: z.object({
-      answers: z.record(z.number()).default({}),
-      submitted: z.boolean().default(false),
-      score: z.number().optional(),
-      total: z.number().optional(),
-      incorrectQuestionIds: z.array(z.string()).optional(),
-      attempts: z.number().optional(),
-      history: z
-        .array(
-          z.object({
-            timestamp: z.number(),
-            score: z.number(),
-            total: z.number(),
-            mode: z.enum(['full', 'retest']),
-          })
-        )
-        .optional(),
-    }).default({ answers: {}, submitted: false }),
-    checklist: z.record(z.boolean()).default({}),
-  }),
+  refinementSnapshots: z.array(SessionSnapshotSchema).default([]),
+  progress: SessionProgressSchema,
 });
 
 export const SavedSessionsListSchema = z.array(SavedSessionSchema);
+
+// Storage Envelope Schema for versioned storage persistence
+export const StorageEnvelopeSchema = z.object({
+  schemaVersion: z.number().int().min(1),
+  sessions: z.array(SavedSessionSchema),
+});

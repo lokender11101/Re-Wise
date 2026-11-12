@@ -46,6 +46,7 @@ export const MOCK_GENERATION_RESPONSE: GenerationResponse = {
           answer:
             'A phenomenon where short I/O-bound processes are delayed in the ready queue behind a single long, CPU-bound process, resulting in poor CPU and device utilization.',
           difficulty: 'easy',
+          conceptTag: 'Convoy Effect',
         },
         {
           id: 'card-2',
@@ -53,6 +54,7 @@ export const MOCK_GENERATION_RESPONSE: GenerationResponse = {
           answer:
             'By enforcing a fixed time quantum (typically 10-100ms). If a process does not complete within this slice, a timer interrupt preempts it and moves it to the tail of the ready queue.',
           difficulty: 'medium',
+          conceptTag: 'Round Robin Quantum',
         },
         {
           id: 'card-3',
@@ -60,6 +62,7 @@ export const MOCK_GENERATION_RESPONSE: GenerationResponse = {
           answer:
             'Aging: a technique that gradually increases the priority of processes that wait in the system for a long duration, guaranteeing eventual execution.',
           difficulty: 'medium',
+          conceptTag: 'Priority Aging',
         },
         {
           id: 'card-4',
@@ -67,6 +70,7 @@ export const MOCK_GENERATION_RESPONSE: GenerationResponse = {
           answer:
             '1. Mutual Exclusion (only one process in the CS at a time)\n2. Progress (selection of next process cannot be postponed indefinitely)\n3. Bounded Waiting (limit on times other processes enter before a waiting process).',
           difficulty: 'hard',
+          conceptTag: 'Critical Section',
         },
       ],
     },
@@ -86,6 +90,7 @@ export const MOCK_GENERATION_RESPONSE: GenerationResponse = {
           correctAnswerIndex: 1,
           explanation:
             'SJF is provably optimal because moving a short process before a long one decreases waiting time for the short process more than it increases waiting time for the long process.',
+          conceptTag: 'SJF Optimality',
         },
         {
           id: 'q-2',
@@ -99,6 +104,7 @@ export const MOCK_GENERATION_RESPONSE: GenerationResponse = {
           correctAnswerIndex: 1,
           explanation:
             'If the time quantum exceeds the longest CPU burst of all ready processes, every process completes in its first burst, behaving identically to FCFS.',
+          conceptTag: 'Time Quantum Sizing',
         },
         {
           id: 'q-3',
@@ -112,6 +118,7 @@ export const MOCK_GENERATION_RESPONSE: GenerationResponse = {
           correctAnswerIndex: 1,
           explanation:
             'A Race Condition occurs when multiple concurrent threads or processes read and write shared data, and the final value depends on the non-deterministic interleaving of instructions.',
+          conceptTag: 'Race Conditions',
         },
       ],
     },

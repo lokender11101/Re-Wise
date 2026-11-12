@@ -22,6 +22,7 @@ export interface Flashcard {
   question: string;
   answer: string;
   difficulty?: 'easy' | 'medium' | 'hard';
+  conceptTag?: string;
 }
 
 export interface FlashcardBlock {
@@ -37,6 +38,7 @@ export interface QuizQuestion {
   options: string[];
   correctAnswerIndex: number;
   explanation: string;
+  conceptTag?: string;
 }
 
 export interface QuizBlock {
@@ -88,6 +90,24 @@ export interface GenerationResponse {
   blocks: StudyBlock[];
 }
 
+// Per-question outcome in a quiz attempt
+export interface QuestionOutcome {
+  selected: number;
+  correct: number;
+  isCorrect: boolean;
+  conceptTag?: string;
+}
+
+// Detailed attempt record for learning analytics
+export interface QuizAttemptRecord {
+  timestamp: number;
+  score: number;
+  total: number;
+  mode: 'full' | 'retest';
+  answers?: { [questionId: string]: number };
+  questionOutcomes?: { [questionId: string]: QuestionOutcome };
+}
+
 // Study Session Progress Tracking State
 export interface SessionProgress {
   flashcards: {
@@ -100,16 +120,21 @@ export interface SessionProgress {
     total?: number;
     incorrectQuestionIds?: string[];
     attempts?: number;
-    history?: {
-      timestamp: number;
-      score: number;
-      total: number;
-      mode: 'full' | 'retest';
-    }[];
+    history?: QuizAttemptRecord[];
   };
   checklist: {
     [itemId: string]: boolean;
   };
+}
+
+// Refinement Snapshot for Bounded Undo capability (captures blocks, title, and full progress)
+export interface SessionSnapshot {
+  id: string;
+  title: string;
+  blocks: StudyBlock[];
+  progress: SessionProgress;
+  timestamp: number;
+  description?: string;
 }
 
 // Full Persisted Study Session
@@ -123,6 +148,8 @@ export interface StudySession {
   updatedAt: number;
   blocks: StudyBlock[];
   progress: SessionProgress;
+  schemaVersion?: number;
+  refinementSnapshots?: SessionSnapshot[];
 }
 
 // Generation & Refinement Request Payloads

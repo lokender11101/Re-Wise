@@ -8,6 +8,7 @@ import type {
   ApiErrorResponse,
 } from '@/types/study';
 import { extractAndParseJSON, validateGenerationResponse } from '@/lib/validation';
+import { SSEFrameParser, SSEEvent } from '@/lib/sseParser';
 
 export interface GenerationError {
   code: string;
@@ -172,10 +173,73 @@ export function useGeneration() {
         }
 
         const decoder = new TextDecoder();
+        const sseParser = new SSEFrameParser();
         let accumulatedJSON = '';
         let bytesCount = 0;
         let chunksCount = 0;
-        let sseBuffer = '';
+
+        const processEvent = (parsedEvent: SSEEvent) => {
+          if (parsedEvent.type === 'stage') {
+            const validStages: GenerationStage[] = [
+              'idle',
+              'analyzing',
+              'structuring',
+              'flashcards',
+              'quiz',
+              'validating',
+              'finalizing',
+            ];
+            const candidate = parsedEvent.stage as GenerationStage;
+            const nextStage = validStages.includes(candidate) ? candidate : undefined;
+
+            setStreamProgress((prev) => ({
+              ...prev,
+              stage: nextStage || prev.stage,
+              stageMessage: parsedEvent.message || prev.stageMessage,
+            }));
+          } else if (parsedEvent.type === 'chunk') {
+            accumulatedJSON += parsedEvent.text || '';
+
+            // Heuristic client-side stage updates based on accumulated tokens
+            if (accumulatedJSON.includes('"quiz"') && streamProgress.stage !== 'quiz') {
+              setStreamProgress((prev) => ({
+                ...prev,
+                stage: 'quiz',
+                stageMessage: 'Formulating multiple-choice comprehension questions...',
+                bytesReceived: bytesCount,
+                chunkCount: chunksCount,
+              }));
+            } else if (accumulatedJSON.includes('"flashcards"') && streamProgress.stage !== 'flashcards') {
+              setStreamProgress((prev) => ({
+                ...prev,
+                stage: 'flashcards',
+                stageMessage: 'Crafting interactive 3D recall flashcards...',
+                bytesReceived: bytesCount,
+                chunkCount: chunksCount,
+              }));
+            } else if (accumulatedJSON.includes('"summary"') && streamProgress.stage !== 'structuring') {
+              setStreamProgress((prev) => ({
+                ...prev,
+                stage: 'structuring',
+                stageMessage: 'Synthesizing executive summary and takeaways...',
+                bytesReceived: bytesCount,
+                chunkCount: chunksCount,
+              }));
+            } else {
+              setStreamProgress((prev) => ({
+                ...prev,
+                bytesReceived: bytesCount,
+                chunkCount: chunksCount,
+              }));
+            }
+          } else if (parsedEvent.type === 'complete') {
+            if (parsedEvent.rawText) {
+              accumulatedJSON = parsedEvent.rawText;
+            }
+          } else if (parsedEvent.type === 'error') {
+            throw new Error(parsedEvent.error || 'Server error received during stream.');
+          }
+        };
 
         while (true) {
           const { done, value } = await reader.read();
@@ -185,74 +249,23 @@ export function useGeneration() {
           chunksCount += 1;
 
           const textChunk = decoder.decode(value, { stream: true });
-          sseBuffer += textChunk;
-
-          // Parse SSE data frames (split by \n\n)
-          const lines = sseBuffer.split('\n\n');
-          sseBuffer = lines.pop() || ''; // retain incomplete tail
-
-          for (const line of lines) {
-            const trimmed = line.trim();
-            if (trimmed.startsWith('data: ')) {
-              try {
-                const parsedEvent = JSON.parse(trimmed.slice(6));
-
-                if (parsedEvent.type === 'stage') {
-                  setStreamProgress((prev) => ({
-                    ...prev,
-                    stage: parsedEvent.stage || prev.stage,
-                    stageMessage: parsedEvent.message || prev.stageMessage,
-                  }));
-                } else if (parsedEvent.type === 'chunk') {
-                  accumulatedJSON += parsedEvent.text || '';
-
-                  // Heuristic client-side stage updates based on accumulated tokens
-                  if (accumulatedJSON.includes('"quiz"') && streamProgress.stage !== 'quiz') {
-                    setStreamProgress((prev) => ({
-                      ...prev,
-                      stage: 'quiz',
-                      stageMessage: 'Formulating multiple-choice comprehension questions...',
-                      bytesReceived: bytesCount,
-                      chunkCount: chunksCount,
-                    }));
-                  } else if (accumulatedJSON.includes('"flashcards"') && streamProgress.stage !== 'flashcards') {
-                    setStreamProgress((prev) => ({
-                      ...prev,
-                      stage: 'flashcards',
-                      stageMessage: 'Crafting interactive 3D recall flashcards...',
-                      bytesReceived: bytesCount,
-                      chunkCount: chunksCount,
-                    }));
-                  } else if (accumulatedJSON.includes('"summary"') && streamProgress.stage !== 'structuring') {
-                    setStreamProgress((prev) => ({
-                      ...prev,
-                      stage: 'structuring',
-                      stageMessage: 'Synthesizing executive summary and takeaways...',
-                      bytesReceived: bytesCount,
-                      chunkCount: chunksCount,
-                    }));
-                  } else {
-                    setStreamProgress((prev) => ({
-                      ...prev,
-                      bytesReceived: bytesCount,
-                      chunkCount: chunksCount,
-                    }));
-                  }
-                } else if (parsedEvent.type === 'complete') {
-                  if (parsedEvent.rawText) {
-                    accumulatedJSON = parsedEvent.rawText;
-                  }
-                } else if (parsedEvent.type === 'error') {
-                  throw new Error(parsedEvent.error || 'Server error received during stream.');
-                }
-              } catch (parseErr) {
-                // If it's the error throw from above, rethrow
-                if (parseErr instanceof Error && parseErr.message.includes('Server error')) {
-                  throw parseErr;
-                }
-              }
-            }
+          const events = sseParser.push(textChunk);
+          for (const ev of events) {
+            processEvent(ev);
           }
+        }
+
+        // Flush decoder and parser trailing frames at stream completion
+        const finalChunk = decoder.decode(new Uint8Array(), { stream: false });
+        if (finalChunk) {
+          const trailingEvents = sseParser.push(finalChunk);
+          for (const ev of trailingEvents) {
+            processEvent(ev);
+          }
+        }
+        const flushedEvents = sseParser.flush();
+        for (const ev of flushedEvents) {
+          processEvent(ev);
         }
 
         if (requestId !== latestRequestIdRef.current) return null;

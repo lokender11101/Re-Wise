@@ -8,6 +8,7 @@ import type {
   ContentBlockType,
   StudyBlock,
   QuizBlock,
+  SessionSnapshot,
 } from '@/types/study';
 import {
   saveSession,
@@ -17,6 +18,7 @@ import {
   setActiveSessionId,
 } from '@/lib/storage';
 import { calculateQuizScore, mergeRefinedBlocks } from '@/lib/studyLogic';
+import { CURRENT_SCHEMA_VERSION } from '@/lib/schemas';
 
 export function useStudySession() {
   const [session, setSession] = useState<StudySession | null>(null);
@@ -66,7 +68,9 @@ export function useStudySession() {
         selectedBlockTypes: input.selectedTypes,
         createdAt: Date.now(),
         updatedAt: Date.now(),
+        schemaVersion: CURRENT_SCHEMA_VERSION,
         blocks: data.blocks,
+        refinementSnapshots: [],
         progress: {
           flashcards: {},
           quiz: {
@@ -91,21 +95,64 @@ export function useStudySession() {
     [syncSession]
   );
 
-  // Update blocks with smart merging (preserves unchanged IDs & user progress)
+  // Update blocks with smart merging and snapshot history for Undo Refinement
   const updateBlocks = useCallback(
-    (newBlocks: StudyBlock[], newTitle?: string) => {
+    (newBlocks: StudyBlock[], newTitle?: string, instruction?: string) => {
       if (!session) return;
+
+      const currentSnapshot: SessionSnapshot = {
+        id: `snap-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`,
+        title: session.title,
+        blocks: session.blocks,
+        progress: session.progress,
+        timestamp: Date.now(),
+        description: instruction || 'Pre-refinement snapshot',
+      };
+
+      const existingSnapshots = session.refinementSnapshots || [];
+      // Retain up to 10 snapshots to bound local storage memory
+      const updatedSnapshots = [...existingSnapshots, currentSnapshot].slice(-10);
+
       const merged = mergeRefinedBlocks(session.blocks, newBlocks);
       const updated: StudySession = {
         ...session,
         title: newTitle || session.title,
         blocks: merged,
         updatedAt: Date.now(),
+        refinementSnapshots: updatedSnapshots,
       };
       syncSession(updated);
     },
     [session, syncSession]
   );
+
+  // Undo Refinement: Revert session blocks and title to the most recent pre-refinement snapshot
+  const undoRefinement = useCallback((): boolean => {
+    if (!session || !session.refinementSnapshots || session.refinementSnapshots.length === 0) {
+      return false;
+    }
+
+    const snapshots = [...session.refinementSnapshots];
+    const previousSnapshot = snapshots.pop();
+    if (!previousSnapshot) return false;
+
+    const updated: StudySession = {
+      ...session,
+      title: previousSnapshot.title,
+      blocks: previousSnapshot.blocks,
+      progress: previousSnapshot.progress || session.progress,
+      updatedAt: Date.now(),
+      refinementSnapshots: snapshots,
+    };
+
+    syncSession(updated);
+    return true;
+  }, [session, syncSession]);
+
+  const canUndoRefinement = Boolean(
+    session?.refinementSnapshots && session.refinementSnapshots.length > 0
+  );
+  const undoSnapshotCount = session?.refinementSnapshots?.length ?? 0;
 
   // Mark Flashcard progress
   const markFlashcard = useCallback(
@@ -168,6 +215,28 @@ export function useStudySession() {
     const result = calculateQuizScore(quizBlock.questions, session.progress.quiz.answers);
     const prevHistory = session.progress.quiz.history || [];
 
+    // Construct per-question outcome record for learning intelligence analytics
+    const questionOutcomes: {
+      [qId: string]: {
+        selected: number;
+        correct: number;
+        isCorrect: boolean;
+        conceptTag?: string;
+      };
+    } = {};
+
+    for (const q of quizBlock.questions) {
+      const selected = session.progress.quiz.answers[q.id];
+      if (selected !== undefined) {
+        questionOutcomes[q.id] = {
+          selected,
+          correct: q.correctAnswerIndex,
+          isCorrect: selected === q.correctAnswerIndex,
+          conceptTag: q.conceptTag,
+        };
+      }
+    }
+
     const updated: StudySession = {
       ...session,
       progress: {
@@ -186,6 +255,8 @@ export function useStudySession() {
               score: result.score,
               total: result.total,
               mode: 'full',
+              answers: { ...session.progress.quiz.answers },
+              questionOutcomes,
             },
           ],
         },
@@ -249,6 +320,28 @@ export function useStudySession() {
     const overallNewResult = calculateQuizScore(quizBlock.questions, updatedQuizAnswers);
     const prevHistory = session.progress.quiz.history || [];
 
+    // Construct per-question outcome record for the retest attempt
+    const retestOutcomes: {
+      [qId: string]: {
+        selected: number;
+        correct: number;
+        isCorrect: boolean;
+        conceptTag?: string;
+      };
+    } = {};
+
+    for (const q of questionsToRetest) {
+      const selected = retestAnswers[q.id];
+      if (selected !== undefined) {
+        retestOutcomes[q.id] = {
+          selected,
+          correct: q.correctAnswerIndex,
+          isCorrect: selected === q.correctAnswerIndex,
+          conceptTag: q.conceptTag,
+        };
+      }
+    }
+
     const updated: StudySession = {
       ...session,
       progress: {
@@ -267,6 +360,8 @@ export function useStudySession() {
               score: result.score,
               total: result.total,
               mode: 'retest',
+              answers: { ...retestAnswers },
+              questionOutcomes: retestOutcomes,
             },
           ],
         },
@@ -367,5 +462,8 @@ export function useStudySession() {
     toggleChecklistItem,
     loadSession,
     clearSession,
+    undoRefinement,
+    canUndoRefinement,
+    undoSnapshotCount,
   };
 }

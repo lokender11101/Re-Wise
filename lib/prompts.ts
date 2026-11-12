@@ -39,9 +39,9 @@ Available block schemas:
 - Summary block:
   { "type": "summary", "id": "summary-1", "title": "...", "content": "...", "keyPoints": ["..."] }
 - Flashcards block:
-  { "type": "flashcards", "id": "flashcards-1", "cards": [{ "id": "c-1", "question": "...", "answer": "...", "difficulty": "medium" }] }
+  { "type": "flashcards", "id": "flashcards-1", "cards": [{ "id": "c-1", "question": "...", "answer": "...", "difficulty": "medium", "conceptTag": "Core Concept" }] }
 - Quiz block:
-  { "type": "quiz", "id": "quiz-1", "questions": [{ "id": "q-1", "question": "...", "options": ["Choice A", "Choice B", "Choice C", "Choice D"], "correctAnswerIndex": 0, "explanation": "..." }] }
+  { "type": "quiz", "id": "quiz-1", "questions": [{ "id": "q-1", "question": "...", "options": ["Choice A", "Choice B", "Choice C", "Choice D"], "correctAnswerIndex": 0, "explanation": "...", "conceptTag": "Core Concept" }] }
 - Checklist block:
   { "type": "checklist", "id": "checklist-1", "title": "Revision Checklist", "items": [{ "id": "item-1", "text": "..." }] }
 - Chart block:
@@ -50,7 +50,8 @@ Available block schemas:
 4. Requested block types for this generation:
 ${requestedBlocksDescription}
 
-5. STRICT QUIZ VALIDATION RULE:
+5. CONCEPT TAGS & QUIZ VALIDATION RULES:
+   - Provide a concise "conceptTag" (1-3 words) for each flashcard and quiz question (e.g., "Critical Section", "Convoy Effect", "Aging") to power learning analytics.
    - "correctAnswerIndex" MUST be a valid 0-based integer strictly less than options.length (0, 1, 2, or 3).
    - "options" MUST contain at least 4 distinct choices.
    - Always include an in-depth "explanation" for each question.

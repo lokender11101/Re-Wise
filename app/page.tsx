@@ -15,6 +15,9 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { useStudySession } from '@/hooks/useStudySession';
 import { useGeneration } from '@/hooks/useGeneration';
 import { MOCK_SAVED_SESSION, SAMPLE_STUDY_MATERIAL } from '@/lib/mockData';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
+import { motion, AnimatePresence } from 'framer-motion';
+import { fadeInVariants } from '@/lib/motion';
 import type { DifficultyLevel, ContentBlockType, GenerateRequestPayload, QuizBlock } from '@/types/study';
 
 export default function ReWiseDashboard() {
@@ -42,6 +45,9 @@ export default function ReWiseDashboard() {
     toggleChecklistItem,
     loadSession,
     clearSession,
+    undoRefinement,
+    canUndoRefinement,
+    undoSnapshotCount,
   } = useStudySession();
 
   const {
@@ -91,7 +97,7 @@ export default function ReWiseDashboard() {
     });
 
     if (result) {
-      updateBlocks(result.blocks, result.title);
+      updateBlocks(result.blocks, result.title, instruction);
       setSessionTrigger((prev) => prev + 1);
     }
   };
@@ -173,69 +179,86 @@ export default function ReWiseDashboard() {
           </div>
         )}
 
-        {/* Active Session Content */}
+        {/* Active Session Content Wrapped in ErrorBoundary and Smooth Motion Transitions */}
         {session && !isGenerating && (
-          <div className="space-y-6 animate-fade-in">
-            {/* Session Header & Overview */}
-            <SessionOverview
-              session={session}
-              onNewSession={handleNewSession}
-              onDeleteSession={() => {
-                clearSession();
-                setSessionTrigger((prev) => prev + 1);
-              }}
-              onSessionRenamed={() => setSessionTrigger((prev) => prev + 1)}
-            />
+          <ErrorBoundary onReset={() => setSessionTrigger((prev) => prev + 1)}>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={session.id}
+                variants={fadeInVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="space-y-6"
+              >
+                {/* Session Header & Overview */}
+                <SessionOverview
+                  session={session}
+                  onNewSession={handleNewSession}
+                  onDeleteSession={() => {
+                    clearSession();
+                    setSessionTrigger((prev) => prev + 1);
+                  }}
+                  onSessionRenamed={() => setSessionTrigger((prev) => prev + 1)}
+                />
 
-            {/* Study Progress & Mastery Bar */}
-            <StudyProgress session={session} />
+                {/* Study Progress & Mastery Bar */}
+                <StudyProgress session={session} />
 
-            {/* Dedicated Wrong-Answer Retest View */}
-            {isRetesting ? (
-              <RetestSection
-                questionsToRetest={questionsToRetest}
-                retestAnswers={retestAnswers}
-                submitted={retestSubmitted}
-                scoreResult={retestScoreResult}
-                previousQuizScore={
-                  session.progress.quiz.score !== undefined && session.progress.quiz.total !== undefined
-                    ? {
-                        score: session.progress.quiz.score,
-                        total: session.progress.quiz.total,
-                      }
-                    : undefined
-                }
-                onRecordRetestAnswer={recordRetestAnswer}
-                onSubmitRetest={submitRetest}
-                onExitRetest={cancelRetest}
-              />
-            ) : (
-              /* All Study Blocks */
-              <div className="space-y-6">
-                {session.blocks.map((block) => (
-                  <BlockRenderer
-                    key={block.id}
-                    block={block}
-                    flashcardProgress={session.progress.flashcards}
-                    onMarkCard={markFlashcard}
-                    quizAnswers={session.progress.quiz.answers}
-                    quizSubmitted={session.progress.quiz.submitted}
-                    onRecordQuizAnswer={recordQuizAnswer}
-                    onSubmitQuiz={submitQuiz}
-                    onResetQuiz={resetQuiz}
-                    onStartRetest={startRetest}
-                    checklistProgress={session.progress.checklist}
-                    onToggleChecklistItem={toggleChecklistItem}
+                {/* Dedicated Wrong-Answer Retest View */}
+                {isRetesting ? (
+                  <RetestSection
+                    questionsToRetest={questionsToRetest}
+                    retestAnswers={retestAnswers}
+                    submitted={retestSubmitted}
+                    scoreResult={retestScoreResult}
+                    previousQuizScore={
+                      session.progress.quiz.score !== undefined && session.progress.quiz.total !== undefined
+                        ? {
+                            score: session.progress.quiz.score,
+                            total: session.progress.quiz.total,
+                          }
+                        : undefined
+                    }
+                    onRecordRetestAnswer={recordRetestAnswer}
+                    onSubmitRetest={submitRetest}
+                    onExitRetest={cancelRetest}
                   />
-                ))}
-              </div>
-            )}
+                ) : (
+                  /* All Study Blocks */
+                  <div className="space-y-6">
+                    {session.blocks.map((block) => (
+                      <BlockRenderer
+                        key={block.id}
+                        block={block}
+                        flashcardProgress={session.progress.flashcards}
+                        onMarkCard={markFlashcard}
+                        quizAnswers={session.progress.quiz.answers}
+                        quizSubmitted={session.progress.quiz.submitted}
+                        onRecordQuizAnswer={recordQuizAnswer}
+                        onSubmitQuiz={submitQuiz}
+                        onResetQuiz={resetQuiz}
+                        onStartRetest={startRetest}
+                        checklistProgress={session.progress.checklist}
+                        onToggleChecklistItem={toggleChecklistItem}
+                      />
+                    ))}
+                  </div>
+                )}
 
-            {/* Refinement Loop Bar */}
-            {!isRetesting && (
-              <RefineBar onRefine={handleRefine} isLoading={isRefining} />
-            )}
-          </div>
+                {/* Refinement Loop Bar */}
+                {!isRetesting && (
+                  <RefineBar
+                    onRefine={handleRefine}
+                    isLoading={isRefining}
+                    onUndo={undoRefinement}
+                    canUndo={canUndoRefinement}
+                    undoCount={undoSnapshotCount}
+                  />
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </ErrorBoundary>
         )}
       </div>
     </MainLayout>

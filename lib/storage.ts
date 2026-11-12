@@ -1,47 +1,149 @@
-import { SavedSessionSchema, SavedSessionsListSchema } from './schemas';
+import {
+  SavedSessionSchema,
+  SavedSessionsListSchema,
+  StorageEnvelopeSchema,
+  CURRENT_SCHEMA_VERSION,
+} from './schemas';
 import type { StudySession, SessionProgress } from '@/types/study';
 
-const SESSIONS_STORAGE_KEY = 'rewise_saved_sessions_v1';
-const ACTIVE_SESSION_ID_KEY = 'rewise_active_session_id_v1';
+export const STORAGE_KEY_V2 = 'rewise_storage_v2';
+export const LEGACY_STORAGE_KEY_V1 = 'rewise_saved_sessions_v1';
+export const ACTIVE_SESSION_ID_KEY = 'rewise_active_session_id_v1';
+export const CURRENT_STORAGE_VERSION = 2;
+
+/**
+ * Migrates a legacy or unversioned session object to the current schema version (v2).
+ */
+export function migrateSession(raw: unknown): StudySession | null {
+  if (!raw || typeof raw !== 'object') return null;
+
+  const candidate = { ...(raw as Record<string, unknown>) };
+
+  // 1. Ensure schemaVersion exists
+  if (!candidate.schemaVersion || typeof candidate.schemaVersion !== 'number') {
+    candidate.schemaVersion = CURRENT_SCHEMA_VERSION;
+  }
+
+  // 2. Ensure refinementSnapshots exists and each snapshot has a valid progress object
+  if (!Array.isArray(candidate.refinementSnapshots)) {
+    candidate.refinementSnapshots = [];
+  } else {
+    candidate.refinementSnapshots = candidate.refinementSnapshots.map((snap) => {
+      if (snap && typeof snap === 'object' && !('progress' in snap)) {
+        return {
+          ...snap,
+          progress: candidate.progress || {
+            flashcards: {},
+            quiz: { answers: {}, submitted: false },
+            checklist: {},
+          },
+        };
+      }
+      return snap;
+    });
+  }
+
+  // 3. Ensure selectedBlockTypes exists or derive from blocks
+  if (!Array.isArray(candidate.selectedBlockTypes) && Array.isArray(candidate.blocks)) {
+    const inferredTypes = new Set<string>();
+    for (const b of candidate.blocks) {
+      if (b && typeof b === 'object' && 'type' in b && typeof b.type === 'string') {
+        inferredTypes.add(b.type);
+      }
+    }
+    candidate.selectedBlockTypes = Array.from(inferredTypes);
+  }
+
+  // 4. Validate through Zod schema
+  const result = SavedSessionSchema.safeParse(candidate);
+  if (result.success) {
+    return result.data as StudySession;
+  }
+
+  console.warn('Migration failed for session:', candidate.id, result.error.message);
+  return null;
+}
 
 /**
  * Safely loads all saved study sessions from localStorage.
  * Defensive against invalid JSON, schema mismatches, or corrupted entries.
+ * Automatically migrates from raw array (v1) into a versioned envelope (v2).
  */
 export function getSavedSessions(): StudySession[] {
   if (typeof window === 'undefined') return [];
 
   try {
-    const rawData = window.localStorage.getItem(SESSIONS_STORAGE_KEY);
-    if (!rawData) return [];
+    // 1. Check for versioned envelope in STORAGE_KEY_V2
+    const v2Raw = window.localStorage.getItem(STORAGE_KEY_V2);
+    if (v2Raw) {
+      let parsedEnvelope: unknown;
+      try {
+        parsedEnvelope = JSON.parse(v2Raw);
+      } catch {
+        console.warn('STORAGE_KEY_V2 contains invalid JSON. Removing corrupted entry.');
+        window.localStorage.removeItem(STORAGE_KEY_V2);
+      }
 
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(rawData);
-    } catch {
-      console.warn('localStorage corrupted: failed to parse saved sessions JSON. Resetting.');
-      window.localStorage.removeItem(SESSIONS_STORAGE_KEY);
-      return [];
-    }
+      if (parsedEnvelope && typeof parsedEnvelope === 'object' && 'schemaVersion' in parsedEnvelope) {
+        const env = parsedEnvelope as { schemaVersion: number; sessions?: unknown[] };
 
-    if (!Array.isArray(parsed)) {
-      console.warn('localStorage data is not an array. Resetting.');
-      return [];
-    }
+        // Handle unsupported future schema versions safely (do not overwrite)
+        if (env.schemaVersion > CURRENT_STORAGE_VERSION) {
+          console.warn(
+            `Storage schema version ${env.schemaVersion} is newer than supported (${CURRENT_STORAGE_VERSION}). Operating in safe read-only mode.`
+          );
+        }
 
-    // Validate sessions individually to preserve valid sessions even if one is corrupted
-    const validSessions: StudySession[] = [];
-    for (const item of parsed) {
-      const result = SavedSessionSchema.safeParse(item);
-      if (result.success) {
-        validSessions.push(result.data as StudySession);
-      } else {
-        console.warn('Skipping corrupted session entry:', item, result.error.message);
+        if (Array.isArray(env.sessions)) {
+          const validSessions: StudySession[] = [];
+          for (const item of env.sessions) {
+            const migrated = migrateSession(item);
+            if (migrated) {
+              validSessions.push(migrated);
+            } else {
+              console.warn('Skipping corrupted session entry in v2 envelope:', item);
+            }
+          }
+          return validSessions.sort((a, b) => b.updatedAt - a.updatedAt);
+        }
       }
     }
 
-    // Sort descending by updatedAt
-    return validSessions.sort((a, b) => b.updatedAt - a.updatedAt);
+    // 2. Fallback / Migration: Check legacy raw array in LEGACY_STORAGE_KEY_V1
+    const v1Raw = window.localStorage.getItem(LEGACY_STORAGE_KEY_V1);
+    if (!v1Raw) return [];
+
+    let parsedV1: unknown;
+    try {
+      parsedV1 = JSON.parse(v1Raw);
+    } catch {
+      console.warn('Legacy localStorage corrupted: failed to parse saved sessions JSON. Resetting.');
+      window.localStorage.removeItem(LEGACY_STORAGE_KEY_V1);
+      return [];
+    }
+
+    if (!Array.isArray(parsedV1)) {
+      console.warn('Legacy localStorage data is not an array.');
+      return [];
+    }
+
+    // Migrate valid legacy sessions
+    const validMigratedSessions: StudySession[] = [];
+    for (const item of parsedV1) {
+      const migrated = migrateSession(item);
+      if (migrated) {
+        validMigratedSessions.push(migrated);
+      } else {
+        console.warn('Skipping corrupted session entry during v1 migration:', item);
+      }
+    }
+
+    // Persist into versioned envelope (without deleting v1 to prevent data loss)
+    if (validMigratedSessions.length > 0) {
+      persistSessions(validMigratedSessions);
+    }
+
+    return validMigratedSessions.sort((a, b) => b.updatedAt - a.updatedAt);
   } catch (error) {
     console.error('Unexpected error reading from localStorage:', error);
     return [];
@@ -49,7 +151,7 @@ export function getSavedSessions(): StudySession[] {
 }
 
 /**
- * Persists an updated list of sessions to localStorage.
+ * Persists an updated list of sessions to localStorage inside the versioned envelope.
  */
 function persistSessions(sessions: StudySession[]): boolean {
   if (typeof window === 'undefined') return false;
@@ -61,7 +163,12 @@ function persistSessions(sessions: StudySession[]): boolean {
       return false;
     }
 
-    window.localStorage.setItem(SESSIONS_STORAGE_KEY, JSON.stringify(validated.data));
+    const envelope = {
+      schemaVersion: CURRENT_STORAGE_VERSION,
+      sessions: validated.data,
+    };
+
+    window.localStorage.setItem(STORAGE_KEY_V2, JSON.stringify(envelope));
     return true;
   } catch (error) {
     console.error('Failed to write sessions to localStorage:', error);
@@ -152,9 +259,13 @@ export function setActiveSessionId(sessionId: string | null): void {
 
 /**
  * Safely imports and validates a study session from a JSON string or object.
+ * Automatically runs schema migration to ensure compatibility with v2.
  */
 export function importSessionFromJSON(rawJSON: string | unknown): StudySession {
   const parsed = typeof rawJSON === 'string' ? JSON.parse(rawJSON) : rawJSON;
-  const validated = SavedSessionSchema.parse(parsed);
-  return saveSession(validated as StudySession);
+  const migrated = migrateSession(parsed);
+  if (!migrated) {
+    throw new Error('Import failed: JSON data does not conform to the ReWise study session schema.');
+  }
+  return saveSession(migrated);
 }

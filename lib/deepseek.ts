@@ -51,7 +51,6 @@ export async function callDeepSeekStructured({
     baseURL: 'https://api.deepseek.com',
     timeout: timeoutMs,
     maxRetries: 1, // Avoid aggressive retry storms on persistent failures
-    dangerouslyAllowBrowser: true, // Enables execution in Node/Next route handlers and test runners
   });
 
   try {
@@ -179,7 +178,6 @@ export async function createDeepSeekStream({
     baseURL: 'https://api.deepseek.com',
     timeout: timeoutMs,
     maxRetries: 1,
-    dangerouslyAllowBrowser: true,
   });
 
   return await client.chat.completions.create(

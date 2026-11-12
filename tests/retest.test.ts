@@ -79,6 +79,22 @@ describe('Study Logic & Wrong-Answer Retest Suite', () => {
     expect(retestResult.incorrectQuestionIds).toEqual([]);
   });
 
+  it('correctly rejects completion when stale answer IDs inflate answered count but an active question is unanswered', () => {
+    // q1 and q2 answered, q3 is NOT answered, but a stale key 'stale_q999' is present
+    const answersWithStaleKey = { q1: 0, q2: 1, stale_q999: 2 };
+    const result = calculateQuizScore(sampleQuestions, answersWithStaleKey);
+
+    // Object.keys(answersWithStaleKey).length is 3, but q3 is missing!
+    expect(result.allAnswered).toBe(false);
+    expect(result.incorrectQuestionIds).toContain('q3');
+    expect(result.score).toBe(2);
+  });
+
+  it('marks allAnswered false for empty answers or partial submissions', () => {
+    expect(calculateQuizScore(sampleQuestions, {}).allAnswered).toBe(false);
+    expect(calculateQuizScore(sampleQuestions, { q1: 0 }).allAnswered).toBe(false);
+  });
+
   it('calculates flashcard progress and mastery percentage accurately', () => {
     const cards: Flashcard[] = [
       { id: 'c1', question: 'Q1', answer: 'A1' },
