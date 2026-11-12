@@ -25,6 +25,85 @@ export class DeepSeekServiceError extends Error {
 }
 
 /**
+ * Centralized error classifier for DeepSeek API failures.
+ * Maps OpenAI SDK and HTTP errors to typed, user-safe DeepSeekServiceError instances
+ * without leaking raw server stack traces or provider internal paths to the browser.
+ */
+export function classifyDeepSeekError(error: unknown, timeoutMs = 35000): DeepSeekServiceError {
+  if (error instanceof DeepSeekServiceError) {
+    return error;
+  }
+
+  const anyErr = error as {
+    status?: number;
+    code?: string;
+    message?: string;
+    name?: string;
+  };
+
+  if (anyErr?.name === 'AbortError' || anyErr?.name === 'APIConnectionTimeoutError') {
+    return new DeepSeekServiceError(
+      `DeepSeek API request timed out after ${Math.round(timeoutMs / 1000)} seconds.`,
+      'REQUEST_TIMEOUT',
+      504,
+      true
+    );
+  }
+
+  const statusCode = anyErr?.status || 500;
+  const rawMsg = anyErr?.message || String(error);
+
+  if (
+    statusCode === 401 ||
+    statusCode === 403 ||
+    rawMsg.includes('Authentication') ||
+    rawMsg.includes('invalid_api_key')
+  ) {
+    return new DeepSeekServiceError(
+      'Invalid DeepSeek API key or unauthorized request. Please check DEEPSEEK_API_KEY in .env.local.',
+      'INVALID_API_KEY',
+      401,
+      false
+    );
+  }
+
+  if (
+    statusCode === 429 ||
+    rawMsg.includes('rate limit') ||
+    rawMsg.includes('insufficient_quota')
+  ) {
+    return new DeepSeekServiceError(
+      'DeepSeek rate limit or credit quota exceeded. Please wait a moment or check your account.',
+      'RATE_LIMIT_EXCEEDED',
+      429,
+      true
+    );
+  }
+
+  if (
+    anyErr?.name === 'APIConnectionError' ||
+    rawMsg.includes('ECONNREFUSED') ||
+    rawMsg.includes('ENOTFOUND') ||
+    rawMsg.includes('fetch failed') ||
+    rawMsg.includes('Connection error')
+  ) {
+    return new DeepSeekServiceError(
+      'Network error reaching DeepSeek API. Please check your internet connection.',
+      'NETWORK_ERROR',
+      503,
+      true
+    );
+  }
+
+  return new DeepSeekServiceError(
+    'DeepSeek generation failed. Please try again.',
+    'GENERATION_FAILED',
+    statusCode,
+    statusCode >= 500
+  );
+}
+
+/**
  * Executes structured DeepSeek API calls via the official OpenAI JavaScript SDK.
  * Configured for DeepSeek's OpenAI-compatible endpoint with JSON object mode.
  */
@@ -84,63 +163,7 @@ export async function callDeepSeekStructured({
 
     return { rawText };
   } catch (error: unknown) {
-    if (error instanceof DeepSeekServiceError) {
-      throw error;
-    }
-
-    // Inspect OpenAI SDK error properties
-    const anyErr = error as {
-      status?: number;
-      code?: string;
-      message?: string;
-      name?: string;
-    };
-
-    if (anyErr?.name === 'AbortError' || anyErr?.name === 'APIConnectionTimeoutError') {
-      throw new DeepSeekServiceError(
-        `DeepSeek API request timed out after ${Math.round(timeoutMs / 1000)} seconds.`,
-        'REQUEST_TIMEOUT',
-        504,
-        true
-      );
-    }
-
-    const statusCode = anyErr?.status || 500;
-    const message = anyErr?.message || String(error);
-
-    if (statusCode === 401 || statusCode === 403 || message.includes('Authentication')) {
-      throw new DeepSeekServiceError(
-        'Invalid DeepSeek API key or unauthorized request. Please check DEEPSEEK_API_KEY in .env.local.',
-        'INVALID_API_KEY',
-        401,
-        false
-      );
-    }
-
-    if (statusCode === 429 || message.includes('rate limit') || message.includes('insufficient_quota')) {
-      throw new DeepSeekServiceError(
-        'DeepSeek rate limit or credit quota exceeded. Please wait a moment or check your account.',
-        'RATE_LIMIT_EXCEEDED',
-        429,
-        true
-      );
-    }
-
-    if (anyErr?.name === 'APIConnectionError' || message.includes('ECONNREFUSED') || message.includes('fetch failed')) {
-      throw new DeepSeekServiceError(
-        'Network error reaching DeepSeek API. Please check your internet connection.',
-        'NETWORK_ERROR',
-        503,
-        true
-      );
-    }
-
-    throw new DeepSeekServiceError(
-      `DeepSeek generation failed: ${message}`,
-      'GENERATION_FAILED',
-      statusCode,
-      statusCode >= 500
-    );
+    throw classifyDeepSeekError(error, timeoutMs);
   }
 }
 
@@ -153,6 +176,7 @@ export interface DeepSeekStreamParams {
 
 /**
  * Creates an asynchronous streaming completion from DeepSeek via OpenAI SDK.
+ * Shared error classification ensures consistent status codes and safe messaging.
  */
 export async function createDeepSeekStream({
   systemInstruction,
@@ -180,23 +204,27 @@ export async function createDeepSeekStream({
     maxRetries: 1,
   });
 
-  return await client.chat.completions.create(
-    {
-      model: modelName,
-      messages: [
-        {
-          role: 'system',
-          content: systemInstruction,
-        },
-        {
-          role: 'user',
-          content: userPrompt,
-        },
-      ],
-      response_format: { type: 'json_object' },
-      stream: true,
-      temperature: 0.3,
-    },
-    { signal: abortSignal }
-  );
+  try {
+    return await client.chat.completions.create(
+      {
+        model: modelName,
+        messages: [
+          {
+            role: 'system',
+            content: systemInstruction,
+          },
+          {
+            role: 'user',
+            content: userPrompt,
+          },
+        ],
+        response_format: { type: 'json_object' },
+        stream: true,
+        temperature: 0.3,
+      },
+      { signal: abortSignal }
+    );
+  } catch (error: unknown) {
+    throw classifyDeepSeekError(error, timeoutMs);
+  }
 }

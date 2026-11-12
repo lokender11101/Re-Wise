@@ -48,6 +48,7 @@ export default function ReWiseDashboard() {
     undoRefinement,
     canUndoRefinement,
     undoSnapshotCount,
+    storageWarning,
   } = useStudySession();
 
   const {
@@ -156,6 +157,13 @@ export default function ReWiseDashboard() {
             onRetry={handleRetry}
             onDismiss={clearError}
           />
+        )}
+
+        {/* Local Storage Protection Warning */}
+        {storageWarning && (
+          <div className="p-4 rounded-xl bg-[#161208] border border-[#3D2E14] text-[#EAB308] text-xs flex items-center justify-between gap-3 animate-fade-in">
+            <span>{storageWarning}</span>
+          </div>
         )}
 
         {/* Input Panel (always shown if no session or if user clicks "New Session") */}

@@ -41,10 +41,10 @@ export const QuizBlock: React.FC<QuizBlockProps> = ({
 
   const questions = block.questions;
   const totalQuestions = questions.length;
-  const answeredCount = Object.keys(answers).length;
+  const answeredCount = questions.filter((q) => answers[q.id] !== undefined).length;
 
   const scoreResult = calculateQuizScore(questions, answers);
-  const isAllAnswered = answeredCount >= totalQuestions;
+  const isAllAnswered = scoreResult.allAnswered;
 
   const handleSubmit = () => {
     if (!isAllAnswered) {

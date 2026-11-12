@@ -45,6 +45,16 @@ export const FlashcardBlock: React.FC<FlashcardBlockProps> = ({
     }
   }, []);
 
+  // Synchronize local cards state when block.cards prop updates, preserving current index position
+  useEffect(() => {
+    setCards(block.cards);
+    setCurrentIndex((prev) => {
+      if (block.cards.length === 0) return 0;
+      return prev < block.cards.length ? prev : block.cards.length - 1;
+    });
+    setIsFlipped(false);
+  }, [block.cards]);
+
   const currentCard = cards[currentIndex] || cards[0];
   const totalCards = cards.length;
 
@@ -181,12 +191,6 @@ export const FlashcardBlock: React.FC<FlashcardBlockProps> = ({
         onClick={handleFlip}
         role="button"
         tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === ' ' || e.key === 'Enter') {
-            e.preventDefault();
-            handleFlip();
-          }
-        }}
         aria-label={`Flashcard ${currentIndex + 1}: ${isFlipped ? 'Answer' : 'Question'}. Click to flip.`}
       >
         <motion.div

@@ -9,10 +9,11 @@
     "prestart": "test -d .next || next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "vitest run --exclude tests/deepseek-integration.test.ts",
-    "test:unit": "vitest run --exclude tests/deepseek-integration.test.ts",
-    "test:integration": "vitest run tests/deepseek-integration.test.ts",
-    "test:all": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "test": "tsc --noEmit && vitest run --exclude tests/deepseek-integration.test.ts",
+    "test:unit": "tsc --noEmit && vitest run --exclude tests/deepseek-integration.test.ts",
+    "test:integration": "tsc --noEmit && vitest run tests/deepseek-integration.test.ts",
+    "test:all": "tsc --noEmit && vitest run",
     "test:watch": "vitest --exclude tests/deepseek-integration.test.ts"
   },
   "dependencies": {

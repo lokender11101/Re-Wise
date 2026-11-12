@@ -39,20 +39,22 @@ export function useKeyboardNav({
           onFlip?.();
           break;
         case 'ArrowRight':
+        case 'KeyJ':
           event.preventDefault();
           onNext?.();
           break;
         case 'ArrowLeft':
+        case 'KeyK':
           event.preventDefault();
           onPrev?.();
           break;
         case 'Digit1':
-        case 'KeyK':
+        case 'KeyM':
           event.preventDefault();
           onMarkKnown?.();
           break;
         case 'Digit2':
-        case 'KeyL':
+        case 'KeyR':
           event.preventDefault();
           onMarkReview?.();
           break;

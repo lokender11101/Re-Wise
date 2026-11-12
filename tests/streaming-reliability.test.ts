@@ -24,9 +24,9 @@ describe('Streaming Reliability & Error Recovery Suite', () => {
     let generatePromise: Promise<unknown>;
     act(() => {
       generatePromise = result.current.generate({
-        topicOrNotes: 'Operating Systems Scheduling',
+        notes: 'Operating Systems Scheduling',
         difficulty: 'intermediate',
-        selectedBlockTypes: ['summary'],
+        selectedTypes: ['summary'],
       });
     });
 
@@ -63,9 +63,9 @@ describe('Streaming Reliability & Error Recovery Suite', () => {
     let res: unknown;
     await act(async () => {
       res = await result.current.generate({
-        topicOrNotes: 'Operating Systems',
+        notes: 'Operating Systems',
         difficulty: 'intermediate',
-        selectedBlockTypes: ['summary'],
+        selectedTypes: ['summary'],
       });
     });
 
@@ -94,9 +94,9 @@ describe('Streaming Reliability & Error Recovery Suite', () => {
     let res: unknown;
     await act(async () => {
       res = await result.current.generate({
-        topicOrNotes: 'Operating Systems',
+        notes: 'Operating Systems',
         difficulty: 'intermediate',
-        selectedBlockTypes: ['summary'],
+        selectedTypes: ['summary'],
       });
     });
 
@@ -124,9 +124,9 @@ describe('Streaming Reliability & Error Recovery Suite', () => {
     let res: unknown;
     await act(async () => {
       res = await result.current.generate({
-        topicOrNotes: 'Operating Systems',
+        notes: 'Operating Systems',
         difficulty: 'intermediate',
-        selectedBlockTypes: ['summary'],
+        selectedTypes: ['summary'],
       });
     });
 

@@ -22,6 +22,7 @@ import { CURRENT_SCHEMA_VERSION } from '@/lib/schemas';
 
 export function useStudySession() {
   const [session, setSession] = useState<StudySession | null>(null);
+  const [storageWarning, setStorageWarning] = useState<string | null>(null);
   const [retestAnswers, setRetestAnswers] = useState<{ [qId: string]: number }>({});
   const [isRetesting, setIsRetesting] = useState(false);
   const [retestSubmitted, setRetestSubmitted] = useState(false);
@@ -46,7 +47,14 @@ export function useStudySession() {
   // Sync session changes to storage
   const syncSession = useCallback((updated: StudySession) => {
     setSession(updated);
-    saveSession(updated);
+    const saved = saveSession(updated);
+    if (!saved) {
+      setStorageWarning(
+        'Warning: Local storage write failed or is protected. Changes to this session may not persist across reloads.'
+      );
+    } else {
+      setStorageWarning(null);
+    }
     setActiveSessionId(updated.id);
   }, []);
 
@@ -218,6 +226,12 @@ export function useStudySession() {
     if (!quizBlock) return;
 
     const result = calculateQuizScore(quizBlock.questions, session.progress.quiz.answers);
+    // Enforce active question completeness: reject submission if any active question is unanswered
+    if (!result.allAnswered) {
+      console.warn('Cannot submit quiz: one or more active questions remain unanswered.');
+      return;
+    }
+
     const prevHistory = session.progress.quiz.history || [];
 
     // Construct per-question outcome record for learning intelligence analytics
@@ -303,8 +317,13 @@ export function useStudySession() {
 
     const wrongIds = session.progress.quiz.incorrectQuestionIds || [];
     const questionsToRetest = quizBlock.questions.filter((q) => wrongIds.includes(q.id));
+    if (questionsToRetest.length === 0) return;
 
     const result = calculateQuizScore(questionsToRetest, retestAnswers);
+    if (!result.allAnswered) {
+      console.warn('Cannot submit retest: one or more retest questions remain unanswered.');
+      return;
+    }
 
     setRetestSubmitted(true);
     setRetestScoreResult({
@@ -470,5 +489,6 @@ export function useStudySession() {
     undoRefinement,
     canUndoRefinement,
     undoSnapshotCount,
+    storageWarning,
   };
 }

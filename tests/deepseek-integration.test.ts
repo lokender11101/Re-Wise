@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, it, expect, beforeAll } from 'vitest';
-import { callDeepSeekStructured } from '@/lib/deepseek';
+import { callDeepSeekStructured, createDeepSeekStream } from '@/lib/deepseek';
 import { buildGenerationPrompt, buildRefinementPrompt } from '@/lib/prompts';
 import { extractAndParseJSON, validateGenerationResponse } from '@/lib/validation';
 import type { StudyBlock } from '@/types/study';
@@ -29,10 +29,55 @@ describe('DeepSeek End-to-End Integration Suite', () => {
   let generatedBlocks: StudyBlock[] = [];
   let generatedTitle = '';
 
+  it('successfully streams real-time tokens from DeepSeek via createDeepSeekStream and validates final JSON', async () => {
+    if (!process.env.DEEPSEEK_API_KEY) {
+      throw new Error(
+        'Live integration test failed: DEEPSEEK_API_KEY is not configured in environment or .env.local. Live API tests cannot pass without authentic credentials.'
+      );
+    }
+
+    const { systemInstruction, userPrompt } = buildGenerationPrompt(
+      'Hash Tables: collision resolution, separate chaining, and open addressing.',
+      'beginner',
+      ['summary', 'flashcards']
+    );
+
+    const stream = await createDeepSeekStream({
+      systemInstruction,
+      userPrompt,
+      timeoutMs: 40000,
+    });
+
+    let accumulatedText = '';
+    let chunkCount = 0;
+
+    for await (const chunk of stream) {
+      const delta = chunk.choices?.[0]?.delta?.content || '';
+      if (delta) {
+        accumulatedText += delta;
+        chunkCount++;
+      }
+    }
+
+    // Proves actual live streaming chunk delivery from DeepSeek API
+    expect(chunkCount).toBeGreaterThan(5);
+    expect(accumulatedText.length).toBeGreaterThan(50);
+
+    const parsed = extractAndParseJSON(accumulatedText);
+    const validated = validateGenerationResponse(parsed);
+
+    expect(validated.title).toBeDefined();
+    expect(validated.blocks.length).toBeGreaterThanOrEqual(1);
+    const types = validated.blocks.map((b) => b.type);
+    expect(types).toContain('summary');
+    expect(types).toContain('flashcards');
+  }, 45000);
+
   it('successfully generates structured study material from DeepSeek API', async () => {
     if (!process.env.DEEPSEEK_API_KEY) {
-      console.warn('Skipping live test: DEEPSEEK_API_KEY not found in environment or .env.local');
-      return;
+      throw new Error(
+        'Live integration test failed: DEEPSEEK_API_KEY is not configured in environment or .env.local.'
+      );
     }
 
     const { systemInstruction, userPrompt } = buildGenerationPrompt(
@@ -72,8 +117,9 @@ describe('DeepSeek End-to-End Integration Suite', () => {
 
   it('successfully refines existing study material with follow-up instruction via DeepSeek', async () => {
     if (!process.env.DEEPSEEK_API_KEY) {
-      console.warn('Skipping live test: DEEPSEEK_API_KEY not found in environment or .env.local');
-      return;
+      throw new Error(
+        'Live integration test failed: DEEPSEEK_API_KEY is not configured in environment or .env.local.'
+      );
     }
 
     expect(generatedBlocks.length).toBeGreaterThan(0);

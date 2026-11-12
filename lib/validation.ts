@@ -41,14 +41,33 @@ export function extractAndParseJSON(rawText: string): unknown {
 }
 
 /**
- * Post-processes validated blocks to ensure all IDs are unique, valid strings
- * (do not depend on the LLM to generate stable IDs).
+ * Post-processes validated blocks to ensure all IDs are unique, valid strings.
+ * Safely replaces duplicated or missing model-generated IDs while preserving
+ * valid, already-unique IDs across blocks, cards, questions, and checklist items.
  */
 export function stabilizeBlockIds(blocks: StudyBlock[]): StudyBlock[] {
+  const seenIds = new Set<string>();
+
+  const getUniqueId = (candidate: unknown, fallbackPrefix: string): string => {
+    if (
+      typeof candidate === 'string' &&
+      candidate.trim().length > 0 &&
+      !seenIds.has(candidate.trim())
+    ) {
+      const trimmed = candidate.trim();
+      seenIds.add(trimmed);
+      return trimmed;
+    }
+    let uniqueId = '';
+    do {
+      uniqueId = `${fallbackPrefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+    } while (seenIds.has(uniqueId));
+    seenIds.add(uniqueId);
+    return uniqueId;
+  };
+
   return blocks.map((block, bIdx) => {
-    const blockId = block.id && typeof block.id === 'string' && block.id.trim().length > 0
-      ? block.id
-      : `${block.type}-${bIdx + 1}-${Date.now().toString(36)}`;
+    const blockId = getUniqueId(block.id, `${block.type}-${bIdx + 1}`);
 
     switch (block.type) {
       case 'summary':
@@ -62,9 +81,7 @@ export function stabilizeBlockIds(blocks: StudyBlock[]): StudyBlock[] {
           id: blockId,
           cards: block.cards.map((card, cIdx) => ({
             ...card,
-            id: card.id && typeof card.id === 'string' && card.id.trim().length > 0
-              ? card.id
-              : `card-${bIdx + 1}-${cIdx + 1}-${Date.now().toString(36)}`,
+            id: getUniqueId(card.id, `card-${bIdx + 1}-${cIdx + 1}`),
           })),
         };
       case 'quiz':
@@ -73,9 +90,7 @@ export function stabilizeBlockIds(blocks: StudyBlock[]): StudyBlock[] {
           id: blockId,
           questions: block.questions.map((q, qIdx) => ({
             ...q,
-            id: q.id && typeof q.id === 'string' && q.id.trim().length > 0
-              ? q.id
-              : `q-${bIdx + 1}-${qIdx + 1}-${Date.now().toString(36)}`,
+            id: getUniqueId(q.id, `q-${bIdx + 1}-${qIdx + 1}`),
           })),
         };
       case 'checklist':
@@ -84,9 +99,7 @@ export function stabilizeBlockIds(blocks: StudyBlock[]): StudyBlock[] {
           id: blockId,
           items: block.items.map((item, iIdx) => ({
             ...item,
-            id: item.id && typeof item.id === 'string' && item.id.trim().length > 0
-              ? item.id
-              : `item-${bIdx + 1}-${iIdx + 1}-${Date.now().toString(36)}`,
+            id: getUniqueId(item.id, `item-${bIdx + 1}-${iIdx + 1}`),
           })),
         };
       case 'chart':

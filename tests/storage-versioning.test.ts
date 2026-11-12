@@ -163,12 +163,28 @@ describe('Storage Versioning & Session Migration Suite', () => {
       id: 'session-to-save',
       schemaVersion: 2,
     } as StudySession;
-    saveSession(newSession);
+    const saveResult = saveSession(newSession);
+    expect(saveResult).toBeNull(); // Saving blocked and returns null!
 
     const storedRaw = window.localStorage.getItem('rewise_storage_v2');
     expect(storedRaw).not.toBeNull();
     const storedParsed = JSON.parse(storedRaw!);
     expect(storedParsed.schemaVersion).toBe(99);
     expect(storedParsed.futureMetadata).toEqual({ experimentalFeature: true });
+  });
+
+  it('rejects future schema versions inside migrateSession and importSessionFromJSON', () => {
+    const futureSession = {
+      ...validV1LegacySession,
+      schemaVersion: 99,
+    };
+
+    // 1. migrateSession must reject
+    expect(migrateSession(futureSession)).toBeNull();
+
+    // 2. importSessionFromJSON must throw descriptive error
+    expect(() => importSessionFromJSON(JSON.stringify(futureSession))).toThrow(
+      /Import failed: Session requires schemaVersion 99/
+    );
   });
 });

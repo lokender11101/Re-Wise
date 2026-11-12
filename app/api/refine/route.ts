@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { RefineRequestSchema } from '@/lib/schemas';
 import { buildRefinementPrompt } from '@/lib/prompts';
-import { callDeepSeekStructured, DeepSeekServiceError } from '@/lib/deepseek';
+import { callDeepSeekStructured, classifyDeepSeekError, DeepSeekServiceError } from '@/lib/deepseek';
 import { extractAndParseJSON, validateGenerationResponse } from '@/lib/validation';
 import type { StudyBlock } from '@/types/study';
 
@@ -68,30 +68,17 @@ export async function POST(request: NextRequest) {
   } catch (error: unknown) {
     console.error('Error in /api/refine:', error);
 
-    if (error instanceof DeepSeekServiceError) {
-      return NextResponse.json(
-        {
-          error: {
-            code: error.code,
-            message: error.message,
-            retryable: error.retryable,
-          },
-        },
-        { status: error.statusCode }
-      );
-    }
-
-    const errorMessage = error instanceof Error ? error.message : 'Unknown refinement error occurred.';
+    const classified = classifyDeepSeekError(error, 35000);
 
     return NextResponse.json(
       {
         error: {
-          code: 'REFINEMENT_ERROR',
-          message: errorMessage,
-          retryable: true,
+          code: classified.code,
+          message: classified.message,
+          retryable: classified.retryable,
         },
       },
-      { status: 500 }
+      { status: classified.statusCode }
     );
   }
 }

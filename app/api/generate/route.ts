@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GenerateRequestSchema } from '@/lib/schemas';
 import { buildGenerationPrompt } from '@/lib/prompts';
-import { callDeepSeekStructured, DeepSeekServiceError } from '@/lib/deepseek';
+import { callDeepSeekStructured, classifyDeepSeekError, DeepSeekServiceError } from '@/lib/deepseek';
 import { extractAndParseJSON, validateGenerationResponse } from '@/lib/validation';
 import { MOCK_GENERATION_RESPONSE } from '@/lib/mockData';
 
@@ -78,30 +78,17 @@ export async function POST(request: NextRequest) {
   } catch (error: unknown) {
     console.error('Error in /api/generate:', error);
 
-    if (error instanceof DeepSeekServiceError) {
-      return NextResponse.json(
-        {
-          error: {
-            code: error.code,
-            message: error.message,
-            retryable: error.retryable,
-          },
-        },
-        { status: error.statusCode }
-      );
-    }
-
-    const errorMessage = error instanceof Error ? error.message : 'Unknown generation error occurred.';
+    const classified = classifyDeepSeekError(error, 35000);
 
     return NextResponse.json(
       {
         error: {
-          code: 'PROCESSING_ERROR',
-          message: errorMessage,
-          retryable: true,
+          code: classified.code,
+          message: classified.message,
+          retryable: classified.retryable,
         },
       },
-      { status: 500 }
+      { status: classified.statusCode }
     );
   }
 }

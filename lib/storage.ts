@@ -19,12 +19,23 @@ export function migrateSession(raw: unknown): StudySession | null {
 
   const candidate = { ...(raw as Record<string, unknown>) };
 
-  // 1. Ensure schemaVersion exists
+  // 1. Reject future schema versions that are not supported
+  if (
+    typeof candidate.schemaVersion === 'number' &&
+    candidate.schemaVersion > CURRENT_SCHEMA_VERSION
+  ) {
+    console.warn(
+      `Session ${candidate.id || 'unknown'} has schemaVersion ${candidate.schemaVersion}, which is newer than supported (${CURRENT_SCHEMA_VERSION}). Rejecting migration to prevent data loss or downgrade.`
+    );
+    return null;
+  }
+
+  // 2. Ensure schemaVersion exists
   if (!candidate.schemaVersion || typeof candidate.schemaVersion !== 'number') {
     candidate.schemaVersion = CURRENT_SCHEMA_VERSION;
   }
 
-  // 2. Ensure refinementSnapshots exists and each snapshot has a valid progress object
+  // 3. Ensure refinementSnapshots exists and each snapshot has a valid progress object
   if (!Array.isArray(candidate.refinementSnapshots)) {
     candidate.refinementSnapshots = [];
   } else {
@@ -200,8 +211,9 @@ function persistSessions(sessions: StudySession[]): boolean {
 
 /**
  * Saves or updates a study session.
+ * Propagates persistSessions status, returning null if saving is blocked or fails.
  */
-export function saveSession(session: StudySession): StudySession {
+export function saveSession(session: StudySession): StudySession | null {
   const sessions = getSavedSessions();
   const existingIndex = sessions.findIndex((s) => s.id === session.id);
 
@@ -218,7 +230,11 @@ export function saveSession(session: StudySession): StudySession {
 
   // Bound storage to 50 most recent sessions to avoid localStorage quota issues
   const trimmed = sessions.slice(0, 50);
-  persistSessions(trimmed);
+  const success = persistSessions(trimmed);
+  if (!success) {
+    console.warn('Failed to save session to localStorage: storage write failed or blocked.');
+    return null;
+  }
 
   return updatedSession;
 }
@@ -243,9 +259,15 @@ export function renameSession(sessionId: string, newTitle: string): StudySession
   const target = sessions.find((s) => s.id === sessionId);
   if (!target) return null;
 
+  const originalTitle = target.title;
   target.title = trimmedTitle;
   target.updatedAt = Date.now();
-  persistSessions(sessions);
+  const success = persistSessions(sessions);
+  if (!success) {
+    target.title = originalTitle;
+    console.warn('Failed to rename session: storage write failed or blocked.');
+    return null;
+  }
   return target;
 }
 
@@ -282,12 +304,29 @@ export function setActiveSessionId(sessionId: string | null): void {
 /**
  * Safely imports and validates a study session from a JSON string or object.
  * Automatically runs schema migration to ensure compatibility with v2.
+ * Rejects future schema versions to prevent unsupported structures from being downgraded.
  */
 export function importSessionFromJSON(rawJSON: string | unknown): StudySession {
   const parsed = typeof rawJSON === 'string' ? JSON.parse(rawJSON) : rawJSON;
+
+  if (parsed && typeof parsed === 'object' && 'schemaVersion' in parsed) {
+    const rawVersion = (parsed as { schemaVersion: unknown }).schemaVersion;
+    if (typeof rawVersion === 'number' && rawVersion > CURRENT_SCHEMA_VERSION) {
+      throw new Error(
+        `Import failed: Session requires schemaVersion ${rawVersion}, but this application only supports up to version ${CURRENT_SCHEMA_VERSION}. Please update ReWise.`
+      );
+    }
+  }
+
   const migrated = migrateSession(parsed);
   if (!migrated) {
     throw new Error('Import failed: JSON data does not conform to the ReWise study session schema.');
   }
-  return saveSession(migrated);
+
+  const saved = saveSession(migrated);
+  if (!saved) {
+    throw new Error('Import failed: Storage envelope is locked or in read-only mode.');
+  }
+
+  return saved;
 }

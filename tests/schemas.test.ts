@@ -189,5 +189,48 @@ Hope this helps your studies!`;
       expect(card.id).toBeDefined();
       expect(card.id.length).toBeGreaterThan(0);
     });
+
+    it('enforces uniqueness and safely replaces duplicate model-generated IDs across entities', () => {
+      const blockWithDuplicateIds = {
+        title: 'Session with Duplicated IDs',
+        blocks: [
+          {
+            type: 'flashcards',
+            id: 'duplicate-id-1',
+            cards: [
+              { id: 'same-card-id', question: 'Card 1?', answer: 'Answer 1.' },
+              { id: 'same-card-id', question: 'Card 2?', answer: 'Answer 2.' }, // DUPLICATE ID
+            ],
+          },
+          {
+            type: 'checklist',
+            id: 'duplicate-id-1', // DUPLICATE BLOCK ID
+            title: 'Checklist',
+            items: [
+              { id: 'same-item-id', text: 'Item 1' },
+              { id: 'same-item-id', text: 'Item 2' }, // DUPLICATE ITEM ID
+            ],
+          },
+        ],
+      };
+
+      const validated = validateGenerationResponse(blockWithDuplicateIds);
+
+      // 1. Block IDs must be strictly unique
+      const blockIds = validated.blocks.map((b) => b.id);
+      expect(new Set(blockIds).size).toBe(2);
+
+      // 2. Card IDs must be strictly unique
+      const cards = (validated.blocks[0] as { cards: { id: string }[] }).cards;
+      expect(cards[0].id).toBe('same-card-id');
+      expect(cards[1].id).not.toBe('same-card-id'); // Replaced safely!
+      expect(new Set(cards.map((c) => c.id)).size).toBe(2);
+
+      // 3. Item IDs must be strictly unique
+      const items = (validated.blocks[1] as { items: { id: string }[] }).items;
+      expect(items[0].id).toBe('same-item-id');
+      expect(items[1].id).not.toBe('same-item-id'); // Replaced safely!
+      expect(new Set(items.map((i) => i.id)).size).toBe(2);
+    });
   });
 });

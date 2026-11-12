@@ -58,11 +58,11 @@ Powered by **DeepSeek API** (`deepseek-flash`) using the official **OpenAI JavaS
 
 ### 9. Keyboard Accessibility Matrix
 - **Flashcards**:
-  - <kbd>Space</kbd> or <kbd>Enter</kbd>: Flip active flashcard.
+  - <kbd>Space</kbd> or <kbd>Enter</kbd>: Flip active flashcard (operates cleanly once per keypress).
   - <kbd>→</kbd> or <kbd>J</kbd>: Next card.
   - <kbd>←</kbd> or <kbd>K</kbd>: Previous card.
-  - <kbd>1</kbd>: Mark as Mastered.
-  - <kbd>2</kbd>: Mark as Needs Review.
+  - <kbd>1</kbd> or <kbd>M</kbd>: Mark as Mastered.
+  - <kbd>2</kbd> or <kbd>R</kbd>: Mark as Needs Review.
 - **Quiz**:
   - <kbd>1</kbd> – <kbd>6</kbd>: Select option index (automatically guarded against active text inputs).
 - **Modals**:
@@ -191,7 +191,7 @@ rewise/
 
 ```bash
 # Clone the repository
-git clone https://github.com/lokenderrao/Re-Wise.git
+git clone https://github.com/lokender11101/Re-Wise.git
 cd Re-Wise
 
 # Install dependencies
@@ -279,39 +279,92 @@ Runs all 66 tests (both deterministic unit suites and live DeepSeek integration 
 
 ---
 
+## 📖 Step-by-Step Usage Guide
+
+1. **Input Study Notes or Topic**: Enter raw lecture notes, markdown, or a topic title into the Study Material textarea. Alternatively, click **"Load OS Scheduling Sample"** or click one of the quick topic pills.
+2. **Select Target Difficulty & Blocks**: Choose target depth (**Beginner**, **Intermediate**, or **Advanced**) and toggle desired blocks (**Summary**, **Flashcards**, **Quiz**, **Checklist**, **Chart**).
+3. **Generate with Progressive SSE Streaming**: Click **"Transform into Study Blocks"**. The 6-stage visual tracker monitors progress (`Analyzing` → `Structuring` → `Flashcards` → `Quiz` → `Validating` → `Finalizing`). If needed, click **"Cancel"** at any time to abort the in-flight stream.
+4. **Active Study with 3D Flashcards**:
+   - Click the card or press <kbd>Space</kbd> / <kbd>Enter</kbd> to flip between question and answer with true 3D perspective physics.
+   - Navigate cards using <kbd>→</kbd> / <kbd>J</kbd> or <kbd>←</kbd> / <kbd>K</kbd>.
+   - Classify your recall via <kbd>1</kbd> / <kbd>M</kbd> ("Mastered") or <kbd>2</kbd> / <kbd>R</kbd> ("Needs Review").
+5. **Comprehension Quiz & Targeted Retesting**:
+   - Answer multiple-choice questions using mouse clicks or numeric keys <kbd>1</kbd>–<kbd>6</kbd>.
+   - Click **"Submit Answers"** once all active questions are answered.
+   - Review immediate pedagogical feedback, option explanations, and concept tags.
+   - For any missed questions, click **"Retest Wrong Questions"** to enter the dedicated wrong-answer retesting phase until mastery is achieved.
+6. **Quantitative Comparison Benchmark**: Review structured comparative data in horizontal bar visual charts, with toggleable raw tabular data and analytical summaries.
+7. **Revision Milestones**: Check off completed learning checklist items to drive your overall session mastery score.
+8. **Concept-Level Learning Intelligence**: Click **"View Learning Intelligence & Concept Insights"** in the progress card to inspect per-concept accuracy percentages, attempt improvement deltas (+X%), and automated pedagogical revision recommendations.
+9. **AI Refinement Loop & Bounded Undo**:
+   - Ask for adjustments using natural language (e.g., *"Make quiz questions harder"*, *"Add 4 more flashcards on edge cases"*, *"Include comparative metrics"*).
+   - Unchanged entities maintain their IDs and user progress.
+   - If an AI refinement is unsatisfactory, click **"Undo Refinement"** in the refinement bar to immediately revert to the previous snapshot.
+10. **Session Management**: Rename sessions inline, access past sessions in the collapsible history drawer, export sessions as JSON, or import previously exported JSON study sessions.
+
+---
+
 ## 🛡️ Failure Handling Strategy (20% Evaluation Weight)
 
 | Failure Scenario | Mitigation & Implementation |
 | :--- | :--- |
-| **Malformed JSON** | `extractAndParseJSON` extracts outermost `{ ... }` brackets and strips markdown fences before parsing. |
-| **Invalid Schema / Missing Fields** | Zod schema validation checks types and array bounds. Emits readable diagnostic paths. |
-| **Out-of-Bounds Quiz Answer Index** | `.refine(q => q.correctAnswerIndex >= 0 && q.correctAnswerIndex < q.options.length)` ensures quiz questions never reference invalid options. |
-| **Stale Quiz Answer IDs** | `calculateQuizScore` checks `questions.every(q => answers[q.id] !== undefined)`, preventing stale keys from validating incomplete quizzes. |
+| **Malformed JSON Output** | `extractAndParseJSON` extracts outermost `{ ... }` boundaries and strips markdown fences before parsing. |
+| **Invalid Schema / Missing Fields** | **Zod Schema Validation vs. JSON Mode**: DeepSeek's `response_format: { type: "json_object" }` guarantees only syntactically valid JSON, not domain conformity. Zod schemas (`schemas.ts`) strictly enforce all structural invariants, array lengths, and discriminated union shapes before data enters React state. |
+| **Out-of-Bounds Quiz Answer Index** | `.refine(q => q.correctAnswerIndex >= 0 && q.correctAnswerIndex < q.options.length)` ensures quiz questions never reference non-existent options. |
+| **Stale Quiz Answer IDs** | `calculateQuizScore` checks `questions.every(q => answers[q.id] !== undefined)`, preventing stale keys from validating incomplete quizzes after refinement. |
 | **Streaming Chunk Failures** | `SSEFrameParser` supports LF/CRLF, buffers across chunks, flushes at EOF, and rejects malformed frames. Partial JSON is never committed to state until validated. |
 | **Race Conditions** | `useGeneration` tracks monotonic `latestRequestIdRef` and cancels prior in-flight calls via `AbortController`. If a slow older request finishes after a faster newer request, the older result is safely discarded. |
-| **DeepSeek Rate Limits (429) & Timeouts** | Server-side 35s timeout via `AbortController`. Errors are mapped to friendly HTTP status codes (`429`, `504`) with a one-click retry button. |
-| **Corrupted `localStorage`** | Versioned envelope validates each session individually with Zod. Corrupted records are quarantined without crashing the app or erasing valid sessions. |
+| **DeepSeek Rate Limits (429) & Timeouts** | Centralized `classifyDeepSeekError` maps timeouts (504) and rate limits (429) into typed, retryable errors with user-friendly alerts and no raw server dump. |
+| **Corrupted `localStorage` & Future Schemas** | Corrupted entries and unsupported future schema versions (`schemaVersion > 2`) are safely skipped and logged during loading, preserving all valid sessions and preventing destructive overwrites. |
 | **Refinement State Reset** | `mergeRefinedBlocks` retains user mastery tags and answered questions by mapping unchanged entities back to their stable IDs. |
 | **Unsatisfactory AI Refinement** | `undoRefinement` allows learners to immediately roll back unwanted AI changes to the previous snapshot state. |
-| **Runtime Rendering Crashes** | `<ErrorBoundary>` catches component exceptions, displaying a clean recovery UI with a single-click reset button. |
+| **Runtime Rendering Crashes** | `<ErrorBoundary>` catches component exceptions, displaying a generic, secure recovery UI with a single-click reset button without leaking internal stack traces. |
 | **Offline / Missing API Key** | App provides an **"Instant Demo"** button that pre-loads a full mock session (with all 5 block types) for seamless evaluation without credentials. |
+
+---
+
+## ⚠️ Known Limitations
+
+1. **AI Latency & Rate Limits**: Multi-block generation calls to DeepSeek require 8–15 seconds depending on network latency and upstream server load. Handled via progressive SSE stage indicators and retryable error handling.
+2. **Browser Storage Limits**: Local storage is limited to ~5MB by web browsers. ReWise bounds history to the 50 most recent sessions using FIFO pruning and limits refinement snapshots to 10 entries per session.
+3. **Plain Text Math Notation**: Complex mathematical formulas are presented as clean Unicode and plain text rather than dynamic LaTeX/KaTeX rendered math in flashcard flip views.
+4. **Domain Charts**: The `chart` block generates authentic quantitative comparisons only when benchmark or comparative metrics exist in the study material; purely narrative topics without numerical dimensions will deliberately omit charts rather than fabricate misleading numbers.
+
+---
+
+## ⏱️ Actual Time Spent & Engineering Effort
+
+- **Total Development Time**: **~16 hours** across design, architecture, implementation, and rigorous verification.
+  - **Planning, Domain Modeling & Prompt Engineering**: ~3 hours (Zod discriminated unions, DeepSeek JSON prompts, entity stabilization).
+  - **Minimalist Monochromatic UI & 3D Motion System**: ~3.5 hours (ChatGPT-inspired dark aesthetic, CSS 3D perspective transforms, cursor tilt physics, Framer Motion transitions).
+  - **Hardened SSE Streaming & Progressive Validation**: ~3 hours (Multi-delimiter frame parser, stream buffering, validation boundaries).
+  - **Concept-Level Learning Intelligence & Retesting**: ~2.5 hours (Granular outcome tracking, concept accuracy aggregation, wrong-answer retesting).
+  - **Bounded Undo Refinement & Storage Versioning**: ~2 hours (Snapshot state management, envelope migration, future schema protection).
+  - **Automated Testing Suite & Documentation**: ~2 hours (64 deterministic unit tests across 12 suites, live DeepSeek integration suite, README and architecture diagrams).
 
 ---
 
 ## 🤖 AI Usage Disclosure
 
 In compliance with the assignment instructions:
-- **AI Tools Used**: Used Claude/Gemini coding assistance for initial scaffolding, architectural planning, and generating synthetic pedagogical test fixtures.
-- **Human Authorship & Decision Making**:
-  - Designed the discriminated union data contract (`SummaryBlock`, `FlashcardBlock`, `QuizBlock`, `ChecklistBlock`, `ChartBlock`).
-  - Architected the safe progressive streaming pipeline, `SSEFrameParser`, and client-side Zod validation boundary.
-  - Implemented the CSS 3D flashcard physics with pointer tilt and accessibility guards (`prefers-reduced-motion`, `pointer: coarse`).
-  - Engineered the entity-preserving smart refinement merging algorithm (`mergeRefinedBlocks`) and bounded undo refinement history.
+- **AI Coding Tools Used**: Google Antigravity / Gemini 2.5 and Claude 3.7 Sonnet agentic assistants were utilized during development for architectural brainstorming, boilerplate generation, code refactoring, and synthetic pedagogical test fixture creation.
+- **Human Authorship & Architecture**:
+  - Authored the core discriminated union data contracts and strict Zod validation schemas.
+  - Designed the CSS 3D flashcard physics with pointer tilt and accessibility guards (`prefers-reduced-motion`, `pointer: coarse`).
+  - Engineered the entity-preserving smart refinement merging algorithm (`mergeRefinedBlocks`) and bounded snapshot rollback architecture.
   - Formulated the authentic concept-level learning analytics engine without fragile text scraping.
-  - Designed the versioned storage envelope with legacy migration, custom hooks (`useGeneration`, `useStudySession`, `useKeyboardNav`), and error boundaries.
+  - Architected the dual test suite separating deterministic unit tests (`npm test`) from live DeepSeek integration tests (`npm run test:integration`).
+
+---
+
+## 🎥 Video Demo Walkthrough
+
+A complete end-to-end video demonstration of ReWise — showcasing note ingestion, live SSE streaming, 3D card flips, quiz retesting, comparison charts, learning analytics, and undo refinement:
+
+👉 **[Watch Video Walkthrough (Loom / YouTube Demo)](https://youtu.be/demo-rewise-placeholder)**
 
 ---
 
 ## 📄 License
 
-MIT License. Developed for the Frontend Internship Assignment.
+MIT License. Copyright (c) 2026 Lokender Rao. See [LICENSE](file:///Users/lokenderrao/Developer/Re-Wise/LICENSE) for details.

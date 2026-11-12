@@ -42,7 +42,8 @@ describe('Storage & Persistence Resilience Suite', () => {
 
   it('saves and retrieves a valid study session', () => {
     const saved = saveSession(MOCK_SAVED_SESSION);
-    expect(saved.id).toBe(MOCK_SAVED_SESSION.id);
+    expect(saved).not.toBeNull();
+    expect(saved?.id).toBe(MOCK_SAVED_SESSION.id);
 
     const loaded = getSavedSessions();
     expect(loaded.length).toBe(1);

@@ -44,8 +44,8 @@ export const RetestSection: React.FC<RetestSectionProps> = ({
   onExitRetest,
 }) => {
   const totalRetest = questionsToRetest.length;
-  const answeredCount = Object.keys(retestAnswers).length;
-  const isAllAnswered = answeredCount >= totalRetest;
+  const answeredCount = questionsToRetest.filter((q) => retestAnswers[q.id] !== undefined).length;
+  const isAllAnswered = totalRetest > 0 && answeredCount === totalRetest;
 
   const handleSubmit = () => {
     onSubmitRetest();

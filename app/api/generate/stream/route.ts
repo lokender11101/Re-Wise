@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GenerateRequestSchema } from '@/lib/schemas';
 import { buildGenerationPrompt } from '@/lib/prompts';
-import { createDeepSeekStream, DeepSeekServiceError } from '@/lib/deepseek';
+import { createDeepSeekStream, classifyDeepSeekError, DeepSeekServiceError } from '@/lib/deepseek';
 import { MOCK_GENERATION_RESPONSE } from '@/lib/mockData';
 
 export async function POST(request: NextRequest) {
@@ -131,13 +131,15 @@ export async function POST(request: NextRequest) {
             return;
           }
 
-          const errMsg = streamErr instanceof Error ? streamErr.message : String(streamErr);
+          // Classify error safely without leaking raw provider exceptions
+          const classified = classifyDeepSeekError(streamErr, 60000);
           controller.enqueue(
             encoder.encode(
               `data: ${JSON.stringify({
                 type: 'error',
-                error: errMsg,
-                code: 'STREAM_TRANSMISSION_ERROR',
+                error: classified.message,
+                code: classified.code,
+                retryable: classified.retryable,
               })}\n\n`
             )
           );
@@ -157,30 +159,17 @@ export async function POST(request: NextRequest) {
   } catch (error: unknown) {
     console.error('Error in /api/generate/stream:', error);
 
-    if (error instanceof DeepSeekServiceError) {
-      return NextResponse.json(
-        {
-          error: {
-            code: error.code,
-            message: error.message,
-            retryable: error.retryable,
-          },
-        },
-        { status: error.statusCode }
-      );
-    }
-
-    const errorMessage = error instanceof Error ? error.message : 'Unknown streaming error occurred.';
+    const classified = classifyDeepSeekError(error, 60000);
 
     return NextResponse.json(
       {
         error: {
-          code: 'PROCESSING_ERROR',
-          message: errorMessage,
-          retryable: true,
+          code: classified.code,
+          message: classified.message,
+          retryable: classified.retryable,
         },
       },
-      { status: 500 }
+      { status: classified.statusCode }
     );
   }
 }

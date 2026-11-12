@@ -69,6 +69,17 @@ describe('DeepSeek API Reliability & Error Classification Suite', () => {
       statusCode: 401,
       retryable: false,
     });
+
+    await expect(
+      createDeepSeekStream({
+        systemInstruction: 'Test',
+        userPrompt: 'Test',
+      })
+    ).rejects.toMatchObject({
+      code: 'INVALID_API_KEY',
+      statusCode: 401,
+      retryable: false,
+    });
   });
 
   it('classifies connection timeouts as REQUEST_TIMEOUT (retryable)', async () => {
@@ -97,6 +108,17 @@ describe('DeepSeek API Reliability & Error Classification Suite', () => {
       statusCode: 504,
       retryable: true,
     });
+
+    await expect(
+      createDeepSeekStream({
+        systemInstruction: 'Test',
+        userPrompt: 'Test',
+      })
+    ).rejects.toMatchObject({
+      code: 'REQUEST_TIMEOUT',
+      statusCode: 504,
+      retryable: true,
+    });
   });
 
   it('classifies 429 and quota exhaustion as RATE_LIMIT_EXCEEDED (retryable)', async () => {
@@ -117,6 +139,17 @@ describe('DeepSeek API Reliability & Error Classification Suite', () => {
 
     await expect(
       callDeepSeekStructured({
+        systemInstruction: 'Test',
+        userPrompt: 'Test',
+      })
+    ).rejects.toMatchObject({
+      code: 'RATE_LIMIT_EXCEEDED',
+      statusCode: 429,
+      retryable: true,
+    });
+
+    await expect(
+      createDeepSeekStream({
         systemInstruction: 'Test',
         userPrompt: 'Test',
       })
@@ -178,6 +211,17 @@ describe('DeepSeek API Reliability & Error Classification Suite', () => {
 
     await expect(
       callDeepSeekStructured({
+        systemInstruction: 'Test',
+        userPrompt: 'Test',
+      })
+    ).rejects.toMatchObject({
+      code: 'NETWORK_ERROR',
+      statusCode: 503,
+      retryable: true,
+    });
+
+    await expect(
+      createDeepSeekStream({
         systemInstruction: 'Test',
         userPrompt: 'Test',
       })

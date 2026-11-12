@@ -90,6 +90,51 @@ describe('Study Logic & Wrong-Answer Retest Suite', () => {
     expect(result.score).toBe(2);
   });
 
+  it('handles post-refinement quiz state where stale question IDs persist in answers map', () => {
+    // Refinement replaced q2 and q3 with new questions new_q4 and new_q5
+    const refinedQuestions: QuizQuestion[] = [
+      sampleQuestions[0], // q1 retained
+      {
+        id: 'new_q4',
+        question: 'Refined deep concept 1',
+        options: ['A', 'B', 'C', 'D'],
+        correctAnswerIndex: 0,
+        explanation: 'Deep 1',
+      },
+      {
+        id: 'new_q5',
+        question: 'Refined deep concept 2',
+        options: ['A', 'B', 'C', 'D'],
+        correctAnswerIndex: 2,
+        explanation: 'Deep 2',
+      },
+    ];
+
+    // Learner previously answered q1, q2, q3 (pre-refinement answers)
+    const answersAfterRefinement = {
+      q1: 0, // matches active question q1 (correct)
+      q2: 1, // STALE (q2 was replaced by refinement)
+      q3: 0, // STALE (q3 was replaced by refinement)
+      new_q4: 0, // matches active question new_q4 (correct)
+      // new_q5 is NOT answered yet
+    };
+
+    // Total active is 3, Object.keys(answers) has 4 keys (exceeding total!)
+    expect(Object.keys(answersAfterRefinement).length).toBe(4);
+
+    const scoreResult = calculateQuizScore(refinedQuestions, answersAfterRefinement);
+
+    // Must be marked incomplete because active question new_q5 is unanswered
+    expect(scoreResult.allAnswered).toBe(false);
+    expect(scoreResult.total).toBe(3);
+    // Score only counts answered active questions (q1 and new_q4 are correct = 2)
+    expect(scoreResult.score).toBe(2);
+    expect(scoreResult.incorrectQuestionIds).toContain('new_q5');
+    // Stale question IDs must NOT pollute incorrectQuestionIds
+    expect(scoreResult.incorrectQuestionIds).not.toContain('q2');
+    expect(scoreResult.incorrectQuestionIds).not.toContain('q3');
+  });
+
   it('marks allAnswered false for empty answers or partial submissions', () => {
     expect(calculateQuizScore(sampleQuestions, {}).allAnswered).toBe(false);
     expect(calculateQuizScore(sampleQuestions, { q1: 0 }).allAnswered).toBe(false);

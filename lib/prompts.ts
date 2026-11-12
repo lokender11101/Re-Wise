@@ -98,10 +98,11 @@ CRITICAL INSTRUCTIONS FOR JSON OUTPUT:
   "title": "Updated Title",
   "blocks": [ ... ]
 }
-4. Preserve the core concepts while accurately executing the user's refinement (e.g., adding questions, increasing quiz difficulty, adding flashcards, or simplifying the summary).
+4. Preserve the core concepts while accurately executing the user's refinement (e.g., adding questions, increasing quiz difficulty, adding flashcards, simplifying the summary, or adding quantitative comparison charts).
 5. Maintain all schema constraints:
    - Every quiz question MUST have at least 4 options and a valid 0-based correctAnswerIndex.
-   - Every block must have a valid "type" ("summary" | "flashcards" | "quiz" | "checklist").`;
+   - Every block must have a valid "type" ("summary" | "flashcards" | "quiz" | "checklist" | "chart").
+   - Chart block schema: { "type": "chart", "id": "chart-1", "title": "...", "chartType": "bar" | "comparison" | "distribution", "data": [{ "label": "...", "value": number, "unit"?: "...", "description"?: "..." }], "summary": "..." }. Do not fabricate arbitrary numbers.`;
 
   const userPrompt = `Current Session:
 Title: ${currentTitle}
