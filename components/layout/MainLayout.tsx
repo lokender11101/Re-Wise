@@ -58,7 +58,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
           savedCount={sessions.length}
         />
 
-        <main className="flex-1 px-4 sm:px-6 md:px-8 py-6 max-w-5xl mx-auto w-full">
+        <main className="flex-1 px-4 sm:px-6 md:px-8 py-6 max-w-7xl 2xl:max-w-[1536px] mx-auto w-full">
           {children}
         </main>
       </div>

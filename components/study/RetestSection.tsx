@@ -63,27 +63,27 @@ export const RetestSection: React.FC<RetestSectionProps> = ({
   const optionLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
 
   return (
-    <Card className="space-y-6 animate-fade-in border-[#252525] bg-[#101010] p-6 md:p-8">
+    <Card id="quiz-block" className="space-y-6 animate-fade-in border-[#2E1E1E] bg-[#1C1313] p-6 md:p-8 scroll-mt-20">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#1F1F1F] pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#2E1E1E] pb-4">
         <div className="flex items-center gap-3">
           <Button
             size="sm"
             variant="ghost"
             onClick={onExitRetest}
             leftIcon={<ArrowLeft className="w-3.5 h-3.5" />}
-            className="text-[#737373] hover:text-[#F5F5F5]"
+            className="text-[#B38080] hover:text-[#FDF2F2]"
           >
             Back
           </Button>
-          <div className="p-2.5 rounded-xl bg-[#181818] border border-[#252525] text-[#F5F5F5]">
+          <div className="p-2.5 rounded-xl bg-[#261717] border border-[#3D2222] text-[#E0AAAA]">
             <RotateCcw className="w-4 h-4" />
           </div>
           <div>
-            <span className="text-[10px] font-semibold tracking-wider text-[#737373] uppercase">
+            <span className="text-[10px] font-semibold tracking-wider text-[#B38080] uppercase">
               Targeted Correction
             </span>
-            <h3 className="text-base md:text-lg font-semibold text-[#F5F5F5]">
+            <h3 className="text-base md:text-lg font-semibold text-[#FDF2F2]">
               Wrong-Answer Retest
             </h3>
           </div>

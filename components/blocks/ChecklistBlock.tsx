@@ -21,25 +21,25 @@ export const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
   const stats = calculateChecklistStats(items, progressMap);
 
   return (
-    <Card className="space-y-6 animate-fade-in border-[#252525] bg-[#101010] p-6 md:p-8">
+    <Card id="checklist-block" className="space-y-6 animate-fade-in border-[#1D2A2E] bg-[#121A1C] p-6 md:p-8 scroll-mt-20">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#1F1F1F] pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#1D2A2E] pb-4">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-[#181818] border border-[#252525] text-[#F5F5F5]">
+          <div className="p-2.5 rounded-xl bg-[#172529] border border-[#22393F] text-[#A5C7CC]">
             <CheckSquare className="w-4 h-4" />
           </div>
           <div>
-            <span className="text-[10px] font-semibold tracking-wider text-[#737373] uppercase">
+            <span className="text-[10px] font-semibold tracking-wider text-[#7A9EA3] uppercase">
               Mastery Verification
             </span>
-            <h3 className="text-base md:text-lg font-semibold text-[#F5F5F5]">{block.title}</h3>
+            <h3 className="text-base md:text-lg font-semibold text-[#F0F7F7]">{block.title}</h3>
           </div>
         </div>
 
         {/* Counter */}
-        <div className="text-xs text-[#737373]">
+        <div className="text-xs text-[#7A9EA3]">
           Completed:{' '}
-          <strong className="text-[#F5F5F5] font-mono text-sm font-semibold">
+          <strong className="text-[#F0F7F7] font-mono text-sm font-semibold">
             {stats.completedCount}
           </strong>{' '}
           / {stats.total} ({stats.percentage}%)
@@ -48,9 +48,9 @@ export const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
 
       {/* Progress Bar */}
       <div className="space-y-1">
-        <div className="h-1.5 w-full bg-[#181818] rounded-full overflow-hidden">
+        <div className="h-1.5 w-full bg-[#0B1112] rounded-full overflow-hidden">
           <div
-            className="h-full bg-white transition-all duration-300 rounded-full"
+            className="h-full bg-[#A5C7CC] transition-all duration-300 rounded-full"
             style={{ width: `${stats.percentage}%` }}
           />
         </div>
@@ -68,15 +68,15 @@ export const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
               onClick={() => onToggleItem?.(item.id)}
               className={`w-full text-left p-4 rounded-xl border transition-all text-xs md:text-sm flex items-start gap-3.5 select-none ${
                 isChecked
-                  ? 'bg-[#0E0E0E] border-[#1F1F1F]'
-                  : 'bg-[#121212] border-[#222222] hover:border-[#383838] hover:bg-[#151515]'
+                  ? 'bg-[#0C1214] border-[#1D2A2E]'
+                  : 'bg-[#101718] border-[#1A2629] hover:border-[#273B40] hover:bg-[#141C1E]'
               }`}
             >
               <div
                 className={`w-4 h-4 rounded-md flex items-center justify-center shrink-0 mt-0.5 border transition-colors ${
                   isChecked
-                    ? 'bg-white border-white text-black'
-                    : 'border-[#333333] bg-[#181818] text-transparent'
+                    ? 'bg-[#A5C7CC] border-[#A5C7CC] text-[#0B1112]'
+                    : 'border-[#273B40] bg-[#172529] text-transparent'
                 }`}
               >
                 {isChecked ? <Check className="w-3 h-3 stroke-[3]" /> : <Square className="w-2.5 h-2.5" />}
@@ -84,7 +84,7 @@ export const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
 
               <span
                 className={`flex-1 leading-relaxed transition-all ${
-                  isChecked ? 'text-[#D4D4D4] font-normal' : 'text-[#F5F5F5] font-normal'
+                  isChecked ? 'text-[#D4E2E4] font-normal' : 'text-[#F0F7F7] font-normal'
                 }`}
               >
                 {item.text}

@@ -73,18 +73,18 @@ export const QuizBlock: React.FC<QuizBlockProps> = ({
   const optionLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
 
   return (
-    <Card className="space-y-6 animate-fade-in border-[#252525] bg-[#101010] p-6 md:p-8">
+    <Card id="quiz-block" className="space-y-6 animate-fade-in border-[#2E1E1E] bg-[#1C1313] p-6 md:p-8 scroll-mt-20">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#1F1F1F] pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#2E1E1E] pb-4">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-[#181818] border border-[#252525] text-[#F5F5F5]">
+          <div className="p-2.5 rounded-xl bg-[#261717] border border-[#3D2222] text-[#E0AAAA]">
             <HelpCircle className="w-4 h-4" />
           </div>
           <div>
-            <span className="text-[10px] font-semibold tracking-wider text-[#737373] uppercase">
+            <span className="text-[10px] font-semibold tracking-wider text-[#B38080] uppercase">
               Comprehension Check
             </span>
-            <h3 className="text-base md:text-lg font-semibold text-[#F5F5F5]">
+            <h3 className="text-base md:text-lg font-semibold text-[#FDF2F2]">
               Multiple-Choice Quiz
             </h3>
           </div>
@@ -97,8 +97,8 @@ export const QuizBlock: React.FC<QuizBlockProps> = ({
               Score: {scoreResult.score}/{totalQuestions} ({scoreResult.percentage}%)
             </Badge>
           ) : (
-            <span className="text-xs text-[#737373]">
-              Answered: <strong className="text-[#F5F5F5] font-mono">{answeredCount}</strong> / {totalQuestions}
+            <span className="text-xs text-[#B38080]">
+              Answered: <strong className="text-[#FDF2F2] font-mono">{answeredCount}</strong> / {totalQuestions}
             </span>
           )}
         </div>
@@ -106,21 +106,21 @@ export const QuizBlock: React.FC<QuizBlockProps> = ({
 
       {/* Submitted Score Summary Banner */}
       {submitted && (
-        <div className="p-5 rounded-2xl bg-[#141414] border border-[#252525] text-[#F5F5F5]">
+        <div className="p-5 rounded-2xl bg-[#140D0D] border border-[#2E1E1E] text-[#F5F5F5]">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3.5">
-              <div className="p-2.5 rounded-xl bg-[#181818] border border-[#252525] text-white">
-                <Trophy className="w-5 h-5 text-white" />
+              <div className="p-2.5 rounded-xl bg-[#261717] border border-[#3D2222] text-[#E0AAAA]">
+                <Trophy className="w-5 h-5 text-[#E0AAAA]" />
               </div>
               <div>
-                <h4 className="text-sm md:text-base font-semibold text-[#F5F5F5]">
+                <h4 className="text-sm md:text-base font-semibold text-[#FDF2F2]">
                   {scoreResult.percentage === 100
                     ? '100% Score — Complete Mastery'
                     : scoreResult.percentage >= 70
                     ? 'Great Comprehension'
                     : 'Targeted Review Recommended'}
                 </h4>
-                <p className="text-xs text-[#A3A3A3] mt-0.5">
+                <p className="text-xs text-[#C2A5A5] mt-0.5">
                   Answered {scoreResult.score} out of {totalQuestions} questions correctly.
                 </p>
               </div>
@@ -147,6 +147,7 @@ export const QuizBlock: React.FC<QuizBlockProps> = ({
                   variant="outline"
                   onClick={onResetQuiz}
                   leftIcon={<RotateCcw className="w-3.5 h-3.5" />}
+                  className="border-[#3D2222] text-[#E0AAAA] hover:bg-[#261717]"
                 >
                   Retake All
                 </Button>
@@ -158,8 +159,8 @@ export const QuizBlock: React.FC<QuizBlockProps> = ({
 
       {/* Validation warning */}
       {validationWarning && (
-        <div className="flex items-center gap-2 p-3 rounded-xl bg-[#141210] border border-[#332A1F] text-xs text-[#FDE047]">
-          <AlertCircle className="w-4 h-4 shrink-0" />
+        <div className="flex items-center gap-2 p-3 rounded-xl bg-[#291717] border border-[#4D2222] text-xs text-[#FCA5A5]">
+          <AlertCircle className="w-4 h-4 shrink-0 text-[#FCA5A5]" />
           <span>{validationWarning}</span>
         </div>
       )}
@@ -188,16 +189,16 @@ export const QuizBlock: React.FC<QuizBlockProps> = ({
                   ? isCorrect
                     ? 'bg-[#0E1410] border-[#1E3825]'
                     : 'bg-[#150F0F] border-[#3D1E1E]'
-                  : 'bg-[#121212] border-[#222222]'
+                  : 'bg-[#140D0D] border-[#281818]'
               }`}
             >
               {/* Question title */}
               <div className="flex items-start justify-between gap-3 mb-4">
                 <div className="flex items-start gap-3 flex-1">
-                  <span className="text-xs font-mono font-medium px-2 py-0.5 rounded bg-[#181818] text-[#737373] border border-[#252525] shrink-0 mt-0.5">
+                  <span className="text-xs font-mono font-medium px-2 py-0.5 rounded bg-[#1E1111] text-[#B38080] border border-[#2E1A1A] shrink-0 mt-0.5">
                     Q{qIdx + 1}
                   </span>
-                  <p className="text-sm md:text-base font-medium text-[#F5F5F5] leading-snug">
+                  <p className="text-sm md:text-base font-medium text-[#FDF2F2] leading-snug">
                     {q.question}
                   </p>
                 </div>
@@ -224,8 +225,8 @@ export const QuizBlock: React.FC<QuizBlockProps> = ({
                   const isThisCorrect = optIdx === q.correctAnswerIndex;
 
                   let optionContainerStyle =
-                    'border-[#252525] bg-[#0A0A0A] hover:bg-[#141414] hover:border-[#383838] text-[#D4D4D4]';
-                  let letterBadgeStyle = 'bg-[#181818] text-[#737373] border border-[#252525]';
+                    'border-[#281818] bg-[#0E0909] hover:bg-[#1A1010] hover:border-[#3D2222] text-[#D8D0D0]';
+                  let letterBadgeStyle = 'bg-[#1E1111] text-[#9E7373] border border-[#2E1A1A]';
 
                   if (submitted) {
                     if (isThisCorrect) {
@@ -240,13 +241,13 @@ export const QuizBlock: React.FC<QuizBlockProps> = ({
                       letterBadgeStyle = 'bg-[#EF4444] text-black font-semibold border-transparent';
                     } else {
                       // Other unselected options: muted, readable
-                      optionContainerStyle = 'border-[#1C1C1C] bg-[#080808] text-[#666666] opacity-60';
-                      letterBadgeStyle = 'bg-[#141414] text-[#555555] border border-[#222222]';
+                      optionContainerStyle = 'border-[#1C1414] bg-[#0A0707] text-[#7A6A6A] opacity-60';
+                      letterBadgeStyle = 'bg-[#140D0D] text-[#554040] border border-[#201414]';
                     }
                   } else if (isThisSelected) {
                     optionContainerStyle =
-                      'border-[#555555] bg-[#1A1A1A] text-white font-medium';
-                    letterBadgeStyle = 'bg-white text-black font-semibold border-white';
+                      'border-[#E0AAAA] bg-[#291717] text-white font-medium';
+                    letterBadgeStyle = 'bg-[#E0AAAA] text-black font-semibold border-[#E0AAAA]';
                   }
 
                   return (

@@ -18,31 +18,31 @@ export const ChartBlock: React.FC<ChartBlockProps> = ({ block }) => {
   const maxValue = Math.max(...data.map((d) => d.value), 1);
 
   return (
-    <Card className="space-y-6 animate-fade-in border-[#252525] bg-[#101010] p-6 md:p-8">
+    <Card id="chart-block" className="space-y-6 animate-fade-in border-[#1F2926] bg-[#151A19] p-6 md:p-8 scroll-mt-20">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#1F1F1F] pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#1F2926] pb-4">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-[#181818] border border-[#252525] text-[#F5F5F5]">
+          <div className="p-2.5 rounded-xl bg-[#1C2623] border border-[#283832] text-[#A8CDBB]">
             <BarChart3 className="w-4 h-4" />
           </div>
           <div>
-            <span className="text-[10px] font-semibold tracking-wider text-[#737373] uppercase">
+            <span className="text-[10px] font-semibold tracking-wider text-[#7C9E8E] uppercase">
               Quantitative Analysis
             </span>
-            <h3 className="text-base md:text-lg font-semibold text-[#F5F5F5]">
+            <h3 className="text-base md:text-lg font-semibold text-[#E8F2EC]">
               {block.title}
             </h3>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <Badge variant="neutral" size="sm" className="capitalize">
+          <Badge variant="neutral" size="sm" className="capitalize bg-[#1A2320] text-[#A8CDBB] border-[#283832]">
             {block.chartType} Comparison
           </Badge>
           <button
             type="button"
             onClick={() => setShowDataTable((prev) => !prev)}
-            className="p-1.5 rounded-lg text-xs text-[#737373] hover:text-[#F5F5F5] hover:bg-[#181818] border border-[#252525] transition-colors"
+            className="p-1.5 rounded-lg text-xs text-[#7C9E8E] hover:text-[#E8F2EC] bg-[#1A2320] hover:bg-[#202C28] border border-[#283832] transition-colors"
             title="Toggle data table"
           >
             <Table className="w-3.5 h-3.5" />
@@ -52,10 +52,10 @@ export const ChartBlock: React.FC<ChartBlockProps> = ({ block }) => {
 
       {/* Accessible Summary Callout */}
       {block.summary && (
-        <div className="p-4 rounded-xl bg-[#0D0D0D] border border-[#1F1F1F] text-xs text-[#A3A3A3] leading-relaxed flex items-start gap-2.5">
-          <Info className="w-4 h-4 text-white shrink-0 mt-0.5" />
+        <div className="p-4 rounded-xl bg-[#0E1312] border border-[#1F2926] text-xs text-[#A6C2B4] leading-relaxed flex items-start gap-2.5">
+          <Info className="w-4 h-4 text-[#A8CDBB] shrink-0 mt-0.5" />
           <p className="flex-1">
-            <strong className="text-white font-medium">Key Insight: </strong>
+            <strong className="text-[#E8F2EC] font-medium">Key Insight: </strong>
             {block.summary}
           </p>
         </div>
@@ -65,7 +65,7 @@ export const ChartBlock: React.FC<ChartBlockProps> = ({ block }) => {
       {!showDataTable ? (
         <div className="space-y-3.5 pt-1">
           {block.yAxisLabel && (
-            <div className="text-[11px] font-mono text-[#737373] uppercase tracking-wider">
+            <div className="text-[11px] font-mono text-[#7C9E8E] uppercase tracking-wider">
               Metric: {block.yAxisLabel}
             </div>
           )}
@@ -82,25 +82,25 @@ export const ChartBlock: React.FC<ChartBlockProps> = ({ block }) => {
                   onMouseLeave={() => setActiveItem(null)}
                   className={`p-3 rounded-xl border transition-all ${
                     isActive
-                      ? 'bg-[#181818] border-[#444444]'
-                      : 'bg-[#121212] border-[#1F1F1F] hover:border-[#333333]'
+                      ? 'bg-[#18211E] border-[#364942]'
+                      : 'bg-[#101514] border-[#1D2623] hover:border-[#2C3B36]'
                   }`}
                 >
                   <div className="flex items-center justify-between text-xs mb-1.5">
-                    <span className="font-medium text-[#F5F5F5] flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                    <span className="font-medium text-[#E8F2EC] flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#A8CDBB]" />
                       {item.label}
                     </span>
-                    <span className="font-mono text-[#D4D4D4] font-semibold">
+                    <span className="font-mono text-[#A8CDBB] font-semibold">
                       {item.value} {item.unit || ''}
                     </span>
                   </div>
 
                   {/* Horizontal Bar Track */}
-                  <div className="h-2.5 w-full bg-[#1A1A1A] rounded-full overflow-hidden flex">
+                  <div className="h-2.5 w-full bg-[#0B0E0D] rounded-full overflow-hidden flex">
                     <div
                       className={`h-full transition-all duration-500 rounded-full ${
-                        isActive ? 'bg-white' : 'bg-[#D4D4D4]'
+                        isActive ? 'bg-white' : 'bg-[#A8CDBB]'
                       }`}
                       style={{ width: `${Math.max(percentage, 4)}%` }}
                     />
@@ -108,7 +108,7 @@ export const ChartBlock: React.FC<ChartBlockProps> = ({ block }) => {
 
                   {/* Optional Description / Context */}
                   {item.description && (
-                    <p className="text-[11px] text-[#737373] mt-1.5 leading-relaxed">
+                    <p className="text-[11px] text-[#7C9E8E] mt-1.5 leading-relaxed">
                       {item.description}
                     </p>
                   )}
@@ -118,16 +118,16 @@ export const ChartBlock: React.FC<ChartBlockProps> = ({ block }) => {
           </div>
 
           {block.xAxisLabel && (
-            <div className="text-right text-[11px] font-mono text-[#525252]">
+            <div className="text-right text-[11px] font-mono text-[#52635B]">
               {block.xAxisLabel}
             </div>
           )}
         </div>
       ) : (
         /* Accessible Raw Data Table */
-        <div className="overflow-x-auto rounded-xl border border-[#222222]">
-          <table className="w-full text-left text-xs text-[#D4D4D4]">
-            <thead className="bg-[#141414] border-b border-[#222222] text-[#737373] uppercase tracking-wider font-semibold">
+        <div className="overflow-x-auto rounded-xl border border-[#1F2926]">
+          <table className="w-full text-left text-xs text-[#D4E2DA]">
+            <thead className="bg-[#0E1312] border-b border-[#1F2926] text-[#7C9E8E] uppercase tracking-wider font-semibold">
               <tr>
                 <th className="p-3">Variable / Category</th>
                 <th className="p-3 font-mono">Value</th>

@@ -44,7 +44,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Sidebar container */}
       <aside
-        className={`fixed md:sticky top-0 left-0 z-40 h-screen w-64 bg-[#080808] border-r border-[#1F1F1F] flex flex-col justify-between transition-transform duration-200 ease-in-out md:translate-x-0 ${
+        className={`fixed md:sticky top-0 left-0 z-40 h-screen w-64 bg-[#101010] border-r border-[#1F1F1F] flex flex-col justify-between transition-transform duration-200 ease-in-out md:translate-x-0 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -136,8 +136,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Bottom Engine Status */}
-        <div className="p-3 border-t border-[#1F1F1F] space-y-2 bg-[#060606]">
-          <div className="p-2 rounded-xl bg-[#0F0F0F] border border-[#1F1F1F] flex items-center gap-2.5 text-xs">
+        <div className="p-3 border-t border-[#1F1F1F] space-y-2 bg-[#0C0C0C]">
+          <div className="p-2 rounded-xl bg-[#151515] border border-[#1F1F1F] flex items-center gap-2.5 text-xs">
             <Cpu className="w-3.5 h-3.5 text-[#A3A3A3] shrink-0" />
             <div className="min-w-0 flex-1">
               <span className="font-medium text-[#F5F5F5] block text-[11px]">
