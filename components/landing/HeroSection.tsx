@@ -52,7 +52,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               rightIcon={<ArrowRight className="w-4 h-4" />}
               className="font-semibold px-6 shadow-lg"
             >
-              Start Study Session
+              Create Study Session
             </Button>
 
             <Button
@@ -62,7 +62,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               leftIcon={<Play className="w-4 h-4 text-[#E5E5E5]" />}
               className="font-medium px-5 border-[#2A2A2A] bg-[#121212] hover:bg-[#1A1A1A]"
             >
-              Explore Instant Demo
+              Explore Demo
             </Button>
           </div>
 

@@ -279,7 +279,7 @@ export const NotesInput: React.FC<NotesInputProps> = ({ onGenerate, isLoading = 
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
           {formatCards.map((format) => {
             const isSelected = selectedTypes.includes(format.id);
             const Icon = format.icon;
