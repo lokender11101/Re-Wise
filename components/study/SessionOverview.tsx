@@ -54,7 +54,7 @@ export const SessionOverview: React.FC<SessionOverviewProps> = ({
       id="overview-block"
       className="p-6 sm:p-8 rounded-3xl bg-[#0D0D0D] border border-[#222222] space-y-6 scroll-mt-24 shadow-xl"
     >
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         {/* Title & Metadata */}
         <div className="space-y-3 flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2.5">

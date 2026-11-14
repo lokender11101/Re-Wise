@@ -145,9 +145,9 @@ export const FeatureShowcase: React.FC = () => {
 
           <div className="p-3.5 rounded-2xl bg-[#090A10] border border-[#1A1C2C] flex items-center justify-between text-xs font-mono">
             <span className="text-[#8B8FB8] text-[11px] flex items-center gap-1.5">
-              <TrendingUp className="w-3.5 h-3.5 text-[#B7B9E2]" /> Improvement Delta
+              <TrendingUp className="w-3.5 h-3.5 text-[#B7B9E2]" /> Diagnostic Metric
             </span>
-            <span className="text-[#B7B9E2] font-semibold">+28% Score Gain</span>
+            <span className="text-[#B7B9E2] font-semibold text-[11px]">Attempt Improvement Tracking</span>
           </div>
         </div>
 

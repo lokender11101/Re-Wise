@@ -50,7 +50,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-[#F5F5F5] flex flex-col font-sans selection:bg-[#333333] selection:text-white">
+    <div className="min-h-screen bg-[#050505] text-[#F5F5F5] flex flex-col font-sans selection:bg-[#333333] selection:text-white overflow-x-hidden">
       {/* Global Top Header (Swiggy / Apple commercial website style) */}
       <Header
         onOpenSavedSessions={() => setIsHistoryDrawerOpen(true)}

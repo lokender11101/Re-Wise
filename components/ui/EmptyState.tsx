@@ -70,7 +70,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           </div>
           <h4 className="font-semibold text-[#F5F5F5] text-sm md:text-base">Wrong-Answer Retest</h4>
           <p className="text-xs text-[#737373] leading-relaxed">
-            Isolate and retry questions you missed with immediate option rationale until you achieve 100% mastery.
+            Isolate and retry questions you missed with immediate option rationale until full concept mastery is achieved.
           </p>
         </div>
 

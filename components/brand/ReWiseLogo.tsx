@@ -109,7 +109,7 @@ export const ReWiseLogo: React.FC<ReWiseLogoProps> = ({
               )}
             </div>
             {resolvedSubtitle && (
-              <p className="hidden md:block text-[11px] text-[#737373] mt-0.5">
+              <p className="hidden xl:block text-[11px] text-[#737373] mt-0.5">
                 {resolvedSubtitle}
               </p>
             )}

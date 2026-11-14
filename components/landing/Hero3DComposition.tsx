@@ -26,7 +26,8 @@ export const Hero3DComposition: React.FC = () => {
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       className="relative w-full h-[360px] sm:h-[420px] md:h-[460px] flex items-center justify-center select-none perspective-1200 overflow-visible"
-      aria-hidden="true"
+      role="img"
+      aria-label="Illustrative product preview of ReWise active learning blocks"
     >
       {/* Background Ambient Aura */}
       <div className="absolute w-72 h-72 rounded-full bg-gradient-to-tr from-neutral-800/20 via-neutral-600/10 to-transparent blur-3xl pointer-events-none" />
@@ -94,7 +95,7 @@ export const Hero3DComposition: React.FC = () => {
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#C8ADD9]" />
               <span className="text-[10px] uppercase tracking-wider font-semibold text-[#A3A3A3]">
-                Active Recall • Card 01
+                Interactive Preview • Card 01
               </span>
             </div>
             <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#1F1F1F] text-[#D4D4D4] border border-[#2E2E2E]">
@@ -117,7 +118,7 @@ export const Hero3DComposition: React.FC = () => {
             <span className="flex items-center gap-1">
               <RotateCw className="w-3 h-3 text-[#A3A3A3]" /> Press Space to flip
             </span>
-            <span className="font-mono text-[10px] text-emerald-400 font-medium">94% Retention</span>
+            <span className="font-mono text-[10px] text-[#A7D8B5] font-medium border border-[#1E3328] px-2 py-0.5 rounded-full bg-[#0F1A14]">Spaced Recall</span>
           </div>
         </motion.div>
 
@@ -136,7 +137,7 @@ export const Hero3DComposition: React.FC = () => {
           <div className="min-w-0 flex-1">
             <div className="text-[10px] uppercase font-semibold text-[#B07B7B]">Quiz Feedback</div>
             <div className="text-[11px] font-medium text-[#F5F5F5] truncate">
-              Option B confirmed correct (+100%)
+              Option B confirmed · Retest Rationale
             </div>
           </div>
         </motion.div>

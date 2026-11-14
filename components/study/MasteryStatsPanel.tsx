@@ -61,9 +61,9 @@ export const MasteryStatsPanel: React.FC<MasteryStatsPanelProps> = ({
         borderColor: THEME.sections.progress.border,
       }}
     >
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
         {/* Left Column: Circular Progress Ring & Session Mastery Score */}
-        <div className="md:col-span-4 flex items-center gap-4 sm:gap-5">
+        <div className="lg:col-span-4 flex items-center gap-4 sm:gap-5">
           <div className="relative w-16 h-16 shrink-0 flex items-center justify-center">
             <svg className="w-16 h-16 -rotate-90 transform" viewBox="0 0 64 64">
               <circle
@@ -109,7 +109,7 @@ export const MasteryStatsPanel: React.FC<MasteryStatsPanelProps> = ({
         </div>
 
         {/* Right Columns: Horizontal Metrics Panels (Zomato style horizontal panels) */}
-        <div className="md:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+        <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
           {/* Flashcard Metric */}
           <div className="p-3.5 rounded-2xl bg-[#090E0B] border border-[#18281E] flex flex-col justify-between gap-2">
             <div className="flex items-center justify-between text-[#8EBA9A]">

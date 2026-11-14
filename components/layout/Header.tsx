@@ -23,14 +23,14 @@ export const Header: React.FC<HeaderProps> = ({
   hasActiveSession = false,
 }) => {
   return (
-    <header className="sticky top-0 z-30 w-full bg-[#050505]/95 backdrop-blur-md border-b border-[#1A1A1A] px-4 sm:px-6 md:px-8 py-3 flex items-center justify-between">
+    <header className="sticky top-0 z-30 w-full max-w-full bg-[#050505]/95 backdrop-blur-md border-b border-[#1A1A1A] px-4 sm:px-6 md:px-8 py-3 flex items-center justify-between">
       {/* Left: ReWise Signature Brand & Identity */}
-      <div className="flex items-center gap-3 md:gap-4">
+      <div className="flex items-center gap-3 md:gap-4 shrink-0">
         {onToggleSidebar && (
           <button
             type="button"
             onClick={onToggleSidebar}
-            className="md:hidden p-1.5 text-[#737373] hover:text-[#F5F5F5] rounded-lg hover:bg-[#141414] transition-colors"
+            className="lg:hidden p-1.5 text-[#737373] hover:text-[#F5F5F5] rounded-lg hover:bg-[#141414] transition-colors"
             aria-label="Toggle navigation drawer"
           >
             <Menu className="w-4 h-4" />
@@ -49,8 +49,8 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* Center: Commercial Navigation Links (Swiggy / Apple inspired) */}
-      <nav className="hidden md:flex items-center gap-1 bg-[#0A0A0A] p-1 rounded-full border border-[#1F1F1F]">
+      {/* Center: Commercial Navigation Links (Swiggy / Apple inspired, visible on desktop >= 1024px) */}
+      <nav className="hidden lg:flex items-center gap-1 bg-[#0A0A0A] p-1 rounded-full border border-[#1F1F1F]">
         <button
           type="button"
           onClick={onNewSession}

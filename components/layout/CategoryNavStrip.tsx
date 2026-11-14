@@ -102,11 +102,11 @@ export const CategoryNavStrip: React.FC<CategoryNavStripProps> = ({
 
   return (
     <div className="sticky top-[57px] z-20 w-full bg-[#050505]/95 backdrop-blur-md border-b border-[#1A1A1A] py-2 px-4 sm:px-6 md:px-8">
-      <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 min-w-0">
         {/* Horizontal Category Strip (Flipkart inspired icon-based category navigation) */}
         <div
           ref={containerRef}
-          className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar scroll-smooth py-0.5"
+          className="flex-1 min-w-0 flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar scroll-smooth py-0.5"
           role="tablist"
           aria-label="Study session learning categories"
         >
