@@ -24,15 +24,11 @@
   --text-disabled: #525252;
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
-body {
+html, body {
   background-color: #050505;
   color: #F5F5F5;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 ::selection {

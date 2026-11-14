@@ -91,12 +91,18 @@ export const CategoryNavStrip: React.FC<CategoryNavStripProps> = ({
     },
   ].filter((c) => c.available);
 
-  // Auto-scroll active item into view on mobile
+  // Auto-scroll active item horizontally within the container ONLY (never touching window scroll)
   useEffect(() => {
-    if (!containerRef.current) return;
-    const activeBtn = containerRef.current.querySelector<HTMLButtonElement>(`[data-id="${activeSection}"]`);
+    const container = containerRef.current;
+    if (!container) return;
+    const activeBtn = container.querySelector<HTMLButtonElement>(`[data-id="${activeSection}"]`);
     if (activeBtn) {
-      activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      const containerRect = container.getBoundingClientRect();
+      const btnRect = activeBtn.getBoundingClientRect();
+      const deltaX = btnRect.left - containerRect.left - (containerRect.width / 2) + (btnRect.width / 2);
+      if (Math.abs(deltaX) > 10) {
+        container.scrollBy({ left: deltaX, behavior: 'smooth' });
+      }
     }
   }, [activeSection]);
 
