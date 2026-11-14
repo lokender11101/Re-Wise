@@ -44,18 +44,21 @@ export const RefineBar: React.FC<RefineBarProps> = ({
   };
 
   return (
-    <div id="refine-block" className="p-6 md:p-8 rounded-2xl bg-[#191714] border border-[#2E241E] space-y-5 scroll-mt-20">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="p-1.5 rounded-xl bg-[#241F1A] border border-[#3D3025] flex items-center justify-center">
+    <div id="refine-block" className="p-6 sm:p-8 md:p-10 rounded-3xl bg-[#14110C] border border-[#282015] space-y-6 scroll-mt-24 shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="p-2.5 rounded-2xl bg-[#201A12] border border-[#3A2D1B] flex items-center justify-center text-[#D8BD91]">
             <ReWiseMark size={20} animated={isLoading} isLoading={isLoading} />
           </div>
           <div>
-            <h3 className="text-base font-semibold text-[#F7F2EA]">
-              AI Content Refinement Loop
+            <span className="text-[10px] font-mono uppercase tracking-widest text-[#A68F68]">
+              Iterative Adaptation
+            </span>
+            <h3 className="text-base sm:text-lg font-bold text-[#FAF5ED]">
+              Adaptive Content Refinement Studio
             </h3>
-            <p className="text-xs text-[#9E8B72]">
-              Iterate and adapt this session with follow-up instructions without starting over
+            <p className="text-xs text-[#8A7960]">
+              Evolve and tailor this study session with natural instructions while preserving your learning state
             </p>
           </div>
         </div>
@@ -68,7 +71,7 @@ export const RefineBar: React.FC<RefineBarProps> = ({
             onClick={onUndo}
             disabled={isLoading}
             leftIcon={<Undo2 className="w-3.5 h-3.5 text-[#B8A68D]" />}
-            className="shrink-0 text-xs text-[#F7F2EA] border-[#3D3025] hover:border-[#D8BD91] bg-[#241F1A] hover:bg-[#2D261F]"
+            className="shrink-0 text-xs text-[#FAF5ED] border-[#3D3025] hover:border-[#D8BD91] bg-[#201A12] hover:bg-[#2A2218]"
             title="Revert to pre-refinement snapshot"
           >
             Undo Refinement {undoCount > 0 ? `(${undoCount})` : ''}
@@ -76,19 +79,24 @@ export const RefineBar: React.FC<RefineBarProps> = ({
         )}
       </div>
 
-      {/* Suggested chips */}
-      <div className="flex flex-wrap gap-2 pt-1">
-        {suggestedPrompts.map((prompt, idx) => (
-          <button
-            key={idx}
-            type="button"
-            disabled={isLoading}
-            onClick={() => handleSelectChip(prompt)}
-            className="text-xs px-3 py-1.5 rounded-lg bg-[#201B16] border border-[#33281E] text-[#B8A68D] hover:text-[#F7F2EA] hover:border-[#4D3C2D] hover:bg-[#28211A] transition-colors disabled:opacity-40"
-          >
-            + {prompt}
-          </button>
-        ))}
+      {/* Suggested prompt chips */}
+      <div className="space-y-2">
+        <span className="text-[11px] text-[#8A7960] font-medium block">
+          Quick Refinement Presets:
+        </span>
+        <div className="flex flex-wrap gap-2">
+          {suggestedPrompts.map((prompt, idx) => (
+            <button
+              key={idx}
+              type="button"
+              disabled={isLoading}
+              onClick={() => handleSelectChip(prompt)}
+              className="text-xs px-3 py-1.5 rounded-xl bg-[#1C1710] border border-[#2D2316] text-[#B8A68D] hover:text-[#FAF5ED] hover:border-[#4D3C25] hover:bg-[#251E14] transition-colors disabled:opacity-40"
+            >
+              + {prompt}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Custom input bar */}
@@ -99,8 +107,8 @@ export const RefineBar: React.FC<RefineBarProps> = ({
             value={instruction}
             onChange={(e) => setInstruction(e.target.value)}
             disabled={isLoading}
-            placeholder="Type a refinement instruction (e.g., 'Add questions testing priority inversion')..."
-            className="w-full rounded-xl bg-[#13100D] border border-[#33281E] px-4 py-3 text-xs md:text-sm text-[#F7F2EA] placeholder-[#6E5D4A] focus:outline-none focus:border-[#D8BD91] focus:ring-1 focus:ring-[#D8BD91]/20 transition-all"
+            placeholder="Type a refinement instruction (e.g., 'Add questions testing priority inversion', 'Include edge cases on mutex deadlocks')..."
+            className="w-full rounded-2xl bg-[#0C0A07] border border-[#2D2316] px-4 sm:px-5 py-3.5 text-xs sm:text-sm text-[#FAF5ED] placeholder-[#665540] focus:outline-none focus:border-[#D8BD91] focus:ring-1 focus:ring-[#D8BD91]/20 transition-all"
           />
         </div>
 
@@ -111,7 +119,7 @@ export const RefineBar: React.FC<RefineBarProps> = ({
           isLoading={isLoading}
           disabled={instruction.trim().length < 3 || isLoading}
           rightIcon={<CornerDownLeft className="w-3.5 h-3.5" />}
-          className="shrink-0 font-semibold px-5"
+          className="shrink-0 font-semibold px-6 shadow-md"
         >
           Refine
         </Button>

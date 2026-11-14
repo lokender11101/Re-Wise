@@ -24,6 +24,10 @@
   --text-disabled: #525252;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background-color: #050505;
   color: #F5F5F5;
@@ -34,6 +38,15 @@ body {
 ::selection {
   background: #333333;
   color: #FFFFFF;
+}
+
+/* Hide scrollbar for category navigation strips while keeping scrollable */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 /* Custom scrollbars for pure black minimalist aesthetic */

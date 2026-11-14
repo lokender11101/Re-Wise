@@ -18,9 +18,9 @@ export const ChartBlock: React.FC<ChartBlockProps> = ({ block }) => {
   const maxValue = Math.max(...data.map((d) => d.value), 1);
 
   return (
-    <Card id="chart-block" className="space-y-6 animate-fade-in border-[#1F2926] bg-[#151A19] p-6 md:p-8 scroll-mt-20">
+    <Card id="chart-block" className="space-y-6 animate-fade-in border-[#1C2824] bg-[#101614] p-6 sm:p-8 md:p-10 rounded-3xl scroll-mt-24 shadow-xl">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#1F2926] pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#1C2824] pb-4">
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-xl bg-[#1C2623] border border-[#283832] text-[#A8CDBB]">
             <BarChart3 className="w-4 h-4" />

@@ -2,17 +2,18 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { ContextualRightSidebar } from '@/components/layout/ContextualRightSidebar';
+import { HeroSection } from '@/components/landing/HeroSection';
+import { FeatureShowcase } from '@/components/landing/FeatureShowcase';
 import { NotesInput } from '@/components/input/NotesInput';
 import { RefineBar } from '@/components/input/RefineBar';
 import { BlockRenderer } from '@/components/blocks/BlockRenderer';
 import { RetestSection } from '@/components/study/RetestSection';
-import { StudyProgress } from '@/components/study/StudyProgress';
+import { MasteryStatsPanel } from '@/components/study/MasteryStatsPanel';
+import { LearningIntelligence } from '@/components/study/LearningIntelligence';
 import { SessionOverview } from '@/components/study/SessionOverview';
 import { GenerationLoadingSkeleton } from '@/components/ui/Skeleton';
 import { StreamingProgressIndicator } from '@/components/ui/StreamingProgressIndicator';
 import { ErrorAlert } from '@/components/ui/ErrorAlert';
-import { EmptyState } from '@/components/ui/EmptyState';
 import { LogoLoader } from '@/components/brand/LogoLoader';
 import { useStudySession } from '@/hooks/useStudySession';
 import { useGeneration } from '@/hooks/useGeneration';
@@ -20,14 +21,12 @@ import { MOCK_SAVED_SESSION, SAMPLE_STUDY_MATERIAL } from '@/lib/mockData';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fadeInVariants } from '@/lib/motion';
-import { Target, X } from 'lucide-react';
 import type { DifficultyLevel, ContentBlockType, GenerateRequestPayload, QuizBlock } from '@/types/study';
 
 export default function ReWiseDashboard() {
   const [sessionTrigger, setSessionTrigger] = useState(0);
   const [showInputPanel, setShowInputPanel] = useState(false);
   const [activeSection, setActiveSection] = useState<string>('overview-block');
-  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   const latestPayloadRef = useRef<GenerateRequestPayload | null>(null);
 
   const {
@@ -118,11 +117,10 @@ export default function ReWiseDashboard() {
   // Pre-fill sample topic into input
   const handleSelectSampleTopic = (topic: string) => {
     setShowInputPanel(true);
-    // Auto-generate or pre-fill
     handleGenerate({
       notes: `${topic}:\n${SAMPLE_STUDY_MATERIAL}`,
       difficulty: 'intermediate',
-      selectedTypes: ['summary', 'flashcards', 'quiz', 'checklist'],
+      selectedTypes: ['summary', 'flashcards', 'quiz', 'checklist', 'chart'],
     });
   };
 
@@ -152,6 +150,7 @@ export default function ReWiseDashboard() {
       'quiz-block',
       'checklist-block',
       'chart-block',
+      'intelligence-block',
       'refine-block',
     ];
 
@@ -181,7 +180,6 @@ export default function ReWiseDashboard() {
   // Navigate smoothly to target section
   const handleNavigate = (id: string) => {
     setActiveSection(id);
-    setShowMobileSidebar(false);
     const el = document.getElementById(id);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -191,14 +189,18 @@ export default function ReWiseDashboard() {
   return (
     <MainLayout
       activeSessionId={session?.id}
+      session={session}
+      activeSection={activeSection}
+      onNavigate={handleNavigate}
       sessionTrigger={sessionTrigger}
       onSelectSession={(id) => {
         loadSession(id);
         setShowInputPanel(false);
       }}
       onNewSession={handleNewSession}
+      isRetesting={isRetesting}
     >
-      <div className="space-y-6 pb-16">
+      <div className="space-y-8 pb-16">
         {/* Error Alert with Retry button */}
         {error && (
           <div className="max-w-4xl mx-auto">
@@ -215,182 +217,141 @@ export default function ReWiseDashboard() {
 
         {/* Local Storage Protection Warning */}
         {storageWarning && (
-          <div className="max-w-4xl mx-auto p-4 rounded-xl bg-[#161208] border border-[#3D2E14] text-[#EAB308] text-xs flex items-center justify-between gap-3 animate-fade-in">
+          <div className="max-w-4xl mx-auto p-4 rounded-2xl bg-[#161208] border border-[#3D2E14] text-[#EAB308] text-xs flex items-center justify-between gap-3 animate-fade-in">
             <span>{storageWarning}</span>
-          </div>
-        )}
-
-        {/* Input Panel (always shown if no session or if user clicks "New Session") */}
-        {(!session || showInputPanel) && !isGenerating && (
-          <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-            <NotesInput onGenerate={handleGenerate} isLoading={isGenerating} />
-            {!session && (
-              <EmptyState
-                onSelectSampleTopic={handleSelectSampleTopic}
-                onLoadDemoSession={handleLoadDemoSession}
-              />
-            )}
           </div>
         )}
 
         {/* Streaming Progress Indicator & Loading Skeleton */}
         {isGenerating && (
-          <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
+          <div className="max-w-4xl mx-auto space-y-6 animate-fade-in py-8">
             <StreamingProgressIndicator progress={streamProgress} onCancel={abort} />
             <GenerationLoadingSkeleton />
           </div>
         )}
 
-        {/* Active Session Content Wrapped in ErrorBoundary and Smooth Motion Transitions */}
+        {/* LANDING MODE: Hero Section + Commercial Creation Studio + Feature Showcase */}
+        {(!session || showInputPanel) && !isGenerating && (
+          <div className="space-y-12 sm:space-y-16 animate-fade-in">
+            {/* Zomato / Apple Inspired Editorial Hero */}
+            <HeroSection
+              onLoadDemo={handleLoadDemoSession}
+              onScrollToInput={() => {
+                const el = document.getElementById('study-input-form');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+              onSelectSampleTopic={handleSelectSampleTopic}
+            />
+
+            {/* 4-Step Commercial Creation Studio */}
+            <div className="max-w-5xl mx-auto">
+              <NotesInput onGenerate={handleGenerate} isLoading={isGenerating} />
+            </div>
+
+            {/* Asymmetric Editorial Feature Showcase Grid */}
+            <FeatureShowcase />
+          </div>
+        )}
+
+        {/* ACTIVE STUDY MODE: Editorial Session Masthead, Mastery Panel & Interactive Blocks */}
         {session && !isGenerating && (
           <ErrorBoundary onReset={() => setSessionTrigger((prev) => prev + 1)}>
-            <div className="flex flex-col xl:flex-row items-start gap-8">
-              {/* Main Workspace Column */}
-              <div className="flex-1 min-w-0 w-full space-y-6">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={session.id}
-                    variants={fadeInVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
-                    className="space-y-6"
-                  >
-                    {/* Session Header & Overview */}
-                    <SessionOverview
-                      session={session}
-                      onNewSession={handleNewSession}
-                      onDeleteSession={() => {
-                        clearSession();
-                        setSessionTrigger((prev) => prev + 1);
-                      }}
-                      onSessionRenamed={() => setSessionTrigger((prev) => prev + 1)}
-                    />
-
-                    {/* Study Progress & Mastery Bar */}
-                    <StudyProgress session={session} />
-
-                    {/* Dedicated Wrong-Answer Retest View */}
-                    {isRetesting ? (
-                      <RetestSection
-                        questionsToRetest={questionsToRetest}
-                        retestAnswers={retestAnswers}
-                        submitted={retestSubmitted}
-                        scoreResult={retestScoreResult}
-                        previousQuizScore={
-                          session.progress.quiz.score !== undefined && session.progress.quiz.total !== undefined
-                            ? {
-                                score: session.progress.quiz.score,
-                                total: session.progress.quiz.total,
-                              }
-                            : undefined
-                        }
-                        onRecordRetestAnswer={recordRetestAnswer}
-                        onSubmitRetest={submitRetest}
-                        onExitRetest={cancelRetest}
-                      />
-                    ) : (
-                      /* All Study Blocks */
-                      <div className="space-y-6">
-                        {session.blocks.map((block) => (
-                          <BlockRenderer
-                            key={block.id}
-                            block={block}
-                            flashcardProgress={session.progress.flashcards}
-                            onMarkCard={markFlashcard}
-                            quizAnswers={session.progress.quiz.answers}
-                            quizSubmitted={session.progress.quiz.submitted}
-                            onRecordQuizAnswer={recordQuizAnswer}
-                            onSubmitQuiz={submitQuiz}
-                            onResetQuiz={resetQuiz}
-                            onStartRetest={startRetest}
-                            checklistProgress={session.progress.checklist}
-                            onToggleChecklistItem={toggleChecklistItem}
-                          />
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Refinement Loop Bar */}
-                    {!isRetesting && (
-                      <div className="space-y-4">
-                        {isRefining && (
-                          <LogoLoader
-                            message="Refining your study material..."
-                            submessage="DeepSeek is adapting content to your instructions while preserving your learning progress"
-                            size="sm"
-                          />
-                        )}
-                        <RefineBar
-                          onRefine={handleRefine}
-                          isLoading={isRefining}
-                          onUndo={undoRefinement}
-                          canUndo={canUndoRefinement}
-                          undoCount={undoSnapshotCount}
-                        />
-                      </div>
-                    )}
-                  </motion.div>
-                </AnimatePresence>
-              </div>
-
-              {/* Right Contextual Sidebar ("Session Intelligence") */}
-              <aside className="hidden xl:block w-72 2xl:w-80 shrink-0 sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto pr-1">
-                <ContextualRightSidebar
-                  session={session}
-                  activeSection={activeSection}
-                  onNavigate={handleNavigate}
-                  onStartRetest={startRetest}
-                  onResetQuiz={resetQuiz}
-                  isRetesting={isRetesting}
-                />
-              </aside>
-            </div>
-
-            {/* Mobile/Tablet Floating Trigger Button */}
-            <div className="xl:hidden fixed bottom-5 right-5 z-30">
-              <button
-                type="button"
-                onClick={() => setShowMobileSidebar(true)}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#151515] hover:bg-[#1E1E1E] border border-[#2E2E2E] shadow-2xl text-xs text-[#F5F5F5] font-medium transition-all"
-                aria-label="Open Session Intelligence"
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={session.id}
+                variants={fadeInVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="space-y-8 max-w-5xl mx-auto"
               >
-                <Target className="w-3.5 h-3.5 text-[#A7D8B5]" />
-                <span>Session Intelligence</span>
-              </button>
-            </div>
-
-            {/* Mobile/Tablet Drawer Sheet */}
-            {showMobileSidebar && (
-              <div className="fixed inset-0 z-50 xl:hidden flex justify-end animate-fade-in">
-                <div
-                  className="fixed inset-0 bg-black/80 backdrop-blur-sm"
-                  onClick={() => setShowMobileSidebar(false)}
+                {/* 1. Session Overview Masthead */}
+                <SessionOverview
+                  session={session}
+                  onNewSession={handleNewSession}
+                  onDeleteSession={() => {
+                    clearSession();
+                    setSessionTrigger((prev) => prev + 1);
+                  }}
+                  onSessionRenamed={() => setSessionTrigger((prev) => prev + 1)}
                 />
-                <div className="relative w-full max-w-sm h-full bg-[#0C0C0C] border-l border-[#222222] p-5 overflow-y-auto z-10 space-y-4">
-                  <div className="flex items-center justify-between pb-3 border-b border-[#1F1F1F]">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-[#737373]">
-                      Session Intelligence
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setShowMobileSidebar(false)}
-                      className="p-1.5 rounded-lg text-[#737373] hover:text-white hover:bg-[#1A1A1A] transition-colors"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
+
+                {/* 2. Mastery & Retention Overview (Zomato style horizontal stats panel) */}
+                <MasteryStatsPanel
+                  session={session}
+                  onScrollToInsights={() => handleNavigate('intelligence-block')}
+                />
+
+                {/* 3. Dedicated Wrong-Answer Retest View or All Study Blocks */}
+                {isRetesting ? (
+                  <RetestSection
+                    questionsToRetest={questionsToRetest}
+                    retestAnswers={retestAnswers}
+                    submitted={retestSubmitted}
+                    scoreResult={retestScoreResult}
+                    previousQuizScore={
+                      session.progress.quiz.score !== undefined && session.progress.quiz.total !== undefined
+                        ? {
+                            score: session.progress.quiz.score,
+                            total: session.progress.quiz.total,
+                          }
+                        : undefined
+                    }
+                    onRecordRetestAnswer={recordRetestAnswer}
+                    onSubmitRetest={submitRetest}
+                    onExitRetest={cancelRetest}
+                  />
+                ) : (
+                  <div className="space-y-8">
+                    {session.blocks.map((block) => (
+                      <BlockRenderer
+                        key={block.id}
+                        block={block}
+                        flashcardProgress={session.progress.flashcards}
+                        onMarkCard={markFlashcard}
+                        quizAnswers={session.progress.quiz.answers}
+                        quizSubmitted={session.progress.quiz.submitted}
+                        onRecordQuizAnswer={recordQuizAnswer}
+                        onSubmitQuiz={submitQuiz}
+                        onResetQuiz={resetQuiz}
+                        onStartRetest={startRetest}
+                        checklistProgress={session.progress.checklist}
+                        onToggleChecklistItem={toggleChecklistItem}
+                      />
+                    ))}
                   </div>
-                  <ContextualRightSidebar
+                )}
+
+                {/* 4. Cognitive Learning Intelligence & Concept Diagnostics */}
+                {!isRetesting && (
+                  <LearningIntelligence
                     session={session}
-                    activeSection={activeSection}
-                    onNavigate={handleNavigate}
                     onStartRetest={startRetest}
-                    onResetQuiz={resetQuiz}
                     isRetesting={isRetesting}
                   />
-                </div>
-              </div>
-            )}
+                )}
+
+                {/* 5. Adaptive Refinement Studio */}
+                {!isRetesting && (
+                  <div className="space-y-4">
+                    {isRefining && (
+                      <LogoLoader
+                        message="Refining your study material..."
+                        submessage="DeepSeek is adapting content to your instructions while preserving your learning progress"
+                        size="sm"
+                      />
+                    )}
+                    <RefineBar
+                      onRefine={handleRefine}
+                      isLoading={isRefining}
+                      onUndo={undoRefinement}
+                      canUndo={canUndoRefinement}
+                      undoCount={undoSnapshotCount}
+                    />
+                  </div>
+                )}
+              </motion.div>
+            </AnimatePresence>
           </ErrorBoundary>
         )}
       </div>

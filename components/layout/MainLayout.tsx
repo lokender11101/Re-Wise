@@ -2,28 +2,35 @@
 
 import React, { useState, useEffect } from 'react';
 import { Header } from './Header';
-import { Sidebar } from './Sidebar';
-import { SavedSessionsModal } from '@/components/history/SavedSessionsModal';
+import { CategoryNavStrip } from './CategoryNavStrip';
+import { SessionHistoryDrawer } from './SessionHistoryDrawer';
 import { getSavedSessions, deleteSession } from '@/lib/storage';
 import type { StudySession } from '@/types/study';
 
 export interface MainLayoutProps {
   children: React.ReactNode;
   activeSessionId?: string;
+  session?: StudySession | null;
+  activeSection?: string;
+  onNavigate?: (sectionId: string) => void;
   onSelectSession: (id: string) => void;
   onNewSession: () => void;
-  sessionTrigger?: number; // Counter to re-sync sessions when updated
+  sessionTrigger?: number;
+  isRetesting?: boolean;
 }
 
 export const MainLayout: React.FC<MainLayoutProps> = ({
   children,
   activeSessionId,
+  session = null,
+  activeSection = 'overview-block',
+  onNavigate,
   onSelectSession,
   onNewSession,
   sessionTrigger = 0,
+  isRetesting = false,
 }) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isSavedModalOpen, setIsSavedModalOpen] = useState(false);
+  const [isHistoryDrawerOpen, setIsHistoryDrawerOpen] = useState(false);
   const [sessions, setSessions] = useState<StudySession[]>([]);
 
   useEffect(() => {
@@ -36,39 +43,49 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
     setSessions((prev) => prev.filter((s) => s.id !== id));
   };
 
+  const handleNavigateToInsights = () => {
+    if (onNavigate) {
+      onNavigate('intelligence-block');
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-[#050505] text-[#F5F5F5] flex flex-col md:flex-row font-sans selection:bg-[#333333] selection:text-white">
-      {/* Sidebar for Desktop & Mobile drawer */}
-      <Sidebar
-        sessions={sessions}
-        activeSessionId={activeSessionId}
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
+    <div className="min-h-screen bg-[#050505] text-[#F5F5F5] flex flex-col font-sans selection:bg-[#333333] selection:text-white">
+      {/* Global Top Header (Swiggy / Apple commercial website style) */}
+      <Header
+        onOpenSavedSessions={() => setIsHistoryDrawerOpen(true)}
         onNewSession={onNewSession}
-        onSelectSession={onSelectSession}
-        onDeleteSession={handleDeleteSession}
+        onNavigateToInsights={handleNavigateToInsights}
+        onToggleSidebar={() => setIsHistoryDrawerOpen((prev) => !prev)}
+        savedCount={sessions.length}
+        hasActiveSession={!!session}
       />
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
-        <Header
-          onOpenSavedSessions={() => setIsSavedModalOpen(true)}
-          onNewSession={onNewSession}
-          onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
-          savedCount={sessions.length}
+      {/* Horizontal Category Navigation Strip (Flipkart icon-based strip, active when session exists) */}
+      {session && onNavigate && (
+        <CategoryNavStrip
+          session={session}
+          activeSection={activeSection}
+          onNavigate={onNavigate}
+          isRetesting={isRetesting}
         />
+      )}
 
-        <main className="flex-1 px-4 sm:px-6 md:px-8 py-6 max-w-7xl 2xl:max-w-[1536px] mx-auto w-full">
-          {children}
-        </main>
-      </div>
+      {/* Main Spacious Content Canvas */}
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-6 md:py-8">
+        {children}
+      </main>
 
-      {/* Saved Sessions Modal */}
-      <SavedSessionsModal
-        isOpen={isSavedModalOpen}
+      {/* Slide-out Session History Drawer */}
+      <SessionHistoryDrawer
+        isOpen={isHistoryDrawerOpen}
+        onClose={() => setIsHistoryDrawerOpen(false)}
+        sessions={sessions}
         activeSessionId={activeSessionId}
-        onClose={() => setIsSavedModalOpen(false)}
         onSelectSession={onSelectSession}
+        onDeleteSession={handleDeleteSession}
+        onNewSession={onNewSession}
+        onSessionRenamed={() => setSessions(getSavedSessions())}
       />
     </div>
   );

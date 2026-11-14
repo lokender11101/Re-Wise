@@ -73,9 +73,9 @@ export const QuizBlock: React.FC<QuizBlockProps> = ({
   const optionLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
 
   return (
-    <Card id="quiz-block" className="space-y-6 animate-fade-in border-[#2E1E1E] bg-[#1C1313] p-6 md:p-8 scroll-mt-20">
+    <Card id="quiz-block" className="space-y-6 animate-fade-in border-[#2C1A1A] bg-[#170E0E] p-6 sm:p-8 md:p-10 rounded-3xl scroll-mt-24 shadow-xl">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#2E1E1E] pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#2C1A1A] pb-4">
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-xl bg-[#261717] border border-[#3D2222] text-[#E0AAAA]">
             <HelpCircle className="w-4 h-4" />

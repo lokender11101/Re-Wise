@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { BookOpen, Check, Copy } from 'lucide-react';
-import { Card } from '@/components/ui/Card';
+import { BookOpen, Check, Copy, Sparkles } from 'lucide-react';
 import type { SummaryBlock as SummaryBlockType } from '@/types/study';
+import { THEME } from '@/lib/designTokens';
 
 export interface SummaryBlockProps {
   block: SummaryBlockType;
@@ -20,25 +20,41 @@ export const SummaryBlock: React.FC<SummaryBlockProps> = ({ block }) => {
   };
 
   return (
-    <Card id="summary-block" className="space-y-6 animate-fade-in border-[#2C241B] bg-[#191713] p-6 md:p-8 scroll-mt-20">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4 border-b border-[#2C241B] pb-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-[#252018] border border-[#3D3224] text-[#D9C69D]">
-            <BookOpen className="w-4 h-4" />
+    <article
+      id="summary-block"
+      className="p-6 sm:p-8 md:p-10 rounded-3xl border space-y-8 scroll-mt-24 shadow-xl"
+      style={{
+        backgroundColor: THEME.sections.summary.surface,
+        borderColor: THEME.sections.summary.border,
+      }}
+    >
+      {/* Editorial Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#282218] pb-5">
+        <div className="flex items-center gap-3.5">
+          <div
+            className="p-2.5 rounded-2xl border"
+            style={{
+              backgroundColor: `${THEME.sections.summary.accent}15`,
+              borderColor: `${THEME.sections.summary.accent}30`,
+              color: THEME.sections.summary.accent,
+            }}
+          >
+            <BookOpen className="w-5 h-5" />
           </div>
           <div>
-            <span className="text-[10px] font-semibold tracking-wider text-[#A6977D] uppercase">
-              Core Concept Summary
+            <span className="text-[10px] font-mono uppercase tracking-widest text-[#A89775]">
+              Executive Synthesis
             </span>
-            <h3 className="text-base md:text-lg font-semibold text-[#F5F1E8]">{block.title}</h3>
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#FAF6ED]">
+              {block.title}
+            </h2>
           </div>
         </div>
 
         <button
           type="button"
           onClick={handleCopy}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#C2B59D] hover:text-[#F5F1E8] bg-[#201D17] hover:bg-[#28241D] rounded-lg border border-[#352D21] hover:border-[#4D402E] transition-colors"
+          className="self-start sm:self-auto inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#C2B59D] hover:text-[#FAF6ED] bg-[#1E1A14] hover:bg-[#282218] rounded-xl border border-[#352D21] hover:border-[#4D402E] transition-colors"
           title="Copy summary to clipboard"
         >
           {copied ? (
@@ -49,36 +65,40 @@ export const SummaryBlock: React.FC<SummaryBlockProps> = ({ block }) => {
           ) : (
             <>
               <Copy className="w-3.5 h-3.5" />
-              <span>Copy</span>
+              <span>Copy Synthesis</span>
             </>
           )}
         </button>
       </div>
 
-      {/* Main Content */}
-      <div className="text-[#DCD5C8] text-sm md:text-base leading-relaxed whitespace-pre-line font-normal space-y-3">
+      {/* Editorial Typeset Body with Comfortable Line Length */}
+      <div className="max-w-4xl text-[#E2DDD3] text-sm sm:text-base leading-[1.8] whitespace-pre-line font-normal space-y-4">
         {block.content}
       </div>
 
-      {/* Key Takeaways */}
+      {/* Key Takeaways Collection */}
       {block.keyPoints && block.keyPoints.length > 0 && (
-        <div className="space-y-3 pt-4 border-t border-[#2C241B]">
-          <h4 className="text-xs font-semibold uppercase tracking-wider text-[#A6977D]">
-            Key Takeaways
-          </h4>
-          <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="space-y-4 pt-6 border-t border-[#282218]">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-3.5 h-3.5 text-[#D9C69D]" />
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-[#A89775]">
+              Core Cognitive Takeaways
+            </h3>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
             {block.keyPoints.map((point, idx) => (
-              <li
+              <div
                 key={idx}
-                className="flex items-start gap-3 p-3.5 rounded-xl bg-[#13110E] border border-[#241E16] text-xs md:text-sm text-[#DCD5C8] leading-relaxed"
+                className="flex items-start gap-3.5 p-4 rounded-2xl bg-[#0F0D0A] border border-[#221B10] text-xs sm:text-sm text-[#E2DDD3] leading-relaxed"
               >
-                <div className="w-1.5 h-1.5 rounded-full bg-[#D9C69D] mt-2 shrink-0" />
+                <div className="w-2 h-2 rounded-full bg-[#D9C69D] mt-1.5 shrink-0 shadow-[0_0_8px_rgba(217,198,157,0.4)]" />
                 <span>{point}</span>
-              </li>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
       )}
-    </Card>
+    </article>
   );
 };

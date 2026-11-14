@@ -21,9 +21,9 @@ export const ChecklistBlock: React.FC<ChecklistBlockProps> = ({
   const stats = calculateChecklistStats(items, progressMap);
 
   return (
-    <Card id="checklist-block" className="space-y-6 animate-fade-in border-[#1D2A2E] bg-[#121A1C] p-6 md:p-8 scroll-mt-20">
+    <Card id="checklist-block" className="space-y-6 animate-fade-in border-[#18262A] bg-[#0E1517] p-6 sm:p-8 md:p-10 rounded-3xl scroll-mt-24 shadow-xl">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#1D2A2E] pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#18262A] pb-4">
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-xl bg-[#172529] border border-[#22393F] text-[#A5C7CC]">
             <CheckSquare className="w-4 h-4" />
